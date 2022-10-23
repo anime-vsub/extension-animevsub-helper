@@ -1,26 +1,68 @@
 /* eslint-disable no-console */
-import { onMessage } from 'webext-bridge'
-import { createApp } from 'vue'
-import App from './views/App.vue'
+import { onMessage, sendMessage } from 'webext-bridge'
 
-// Firefox `browser.tabs.executeScript()` requires scripts return a primitive value
-(() => {
-  console.info('[vitesse-webext] Hello world from content script')
+function get(options) {
+  return sendMessage("http:get", {
+      url: options.url,
+      headers: options.headers,
+      responseType: options.responseType
+    })
+}
+function post(options) {
+  return sendMessage("http:post", {
+      url: options.url,
+      headers: options.headers
+      ,
+      responseType: options.responseType,
+      data: options.data
+    })
+}
 
-  // communication example: send previous tab title from background page
-  onMessage('tab-prev', ({ data }) => {
-    console.log(`[vitesse-webext] Navigate from page "${data.title}"`)
-  })
 
-  // mount component to context window
-  const container = document.createElement('div')
-  const root = document.createElement('div')
-  const styleEl = document.createElement('link')
-  const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
-  styleEl.setAttribute('rel', 'stylesheet')
-  styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
-  shadowDOM.appendChild(styleEl)
-  shadowDOM.appendChild(root)
-  document.body.appendChild(container)
-  createApp(App).mount(root)
+document.addEventListener("request:http-get", async ({ detail }) => {
+    document.dispatchEvent(new CustomEvent('response:http-get', {
+      detail: await get(detail).then((res) => {
+        return {
+          id: detail.id,
+          ok: true,
+          res
+        }
+      }).catch(err => {
+        return {
+          id: detail.id,
+          ok: false,
+          res: err
+        }
+      })
+    })
+    )
+})
+
+document.addEventListener("request:http-post", async ({ detail }) => {
+    document.dispatchEvent(new CustomEvent('response:http-post', {
+      detail: await post(detail).then((res) => {
+        return {
+          id: detail.id,
+          ok: true,
+          res
+        }
+      }).catch(err => {
+        return {
+          id: detail.id,
+          ok: false,
+          res: err
+        }
+      })
+    })
+    )
+})
+
+;(() => {
+  console.log("start inject")
+var s = document.createElement('script');
+  s.src = chrome.runtime.getURL('dist/contentScripts/inject.global.js');
+  s.onload = function() {
+      this.remove();
+  };
+  (document.head || document.documentElement).appendChild(s);
 })()

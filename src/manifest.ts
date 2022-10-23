@@ -33,6 +33,7 @@ export async function getManifest() {
       'tabs',
       'storage',
       'activeTab',
+      'scripting'
     ],
     host_permissions: ['*://*/*'],
     content_scripts: [
@@ -43,7 +44,7 @@ export async function getManifest() {
     ],
     web_accessible_resources: [
       {
-        resources: ['dist/contentScripts/style.css'],
+        resources: ['dist/contentScripts/style.css', 'dist/contentScripts/inject.global.js'],
         matches: ['<all_urls>'],
       },
     ],
@@ -59,7 +60,7 @@ export async function getManifest() {
     // for content script, as browsers will cache them for each reload,
     // we use a background script to always inject the latest version
     // see src/background/contentScriptHMR.ts
-    delete manifest.content_scripts
+    // delete manifest.content_scripts
     manifest.permissions?.push('webNavigation')
   }
 
