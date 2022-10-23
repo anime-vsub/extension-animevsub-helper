@@ -1,68 +1,77 @@
-/* eslint-disable no-console */
-import { onMessage, sendMessage } from 'webext-bridge'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-undef */
+/* eslint-disable n/no-unpublished-import */
 
-function get(options) {
+import { sendMessage } from "webext-bridge"
+import browser from "webextension-polyfill"
+
+import type { OptionsHttpGet, OptionsHttpPost } from "~/background"
+
+function get(options: OptionsHttpGet) {
   return sendMessage("http:get", {
-      url: options.url,
-      headers: options.headers,
-      responseType: options.responseType
-    })
+    url: options.url,
+    headers: options.headers,
+    responseType: options.responseType
+  })
 }
-function post(options) {
+function post(options: OptionsHttpPost) {
   return sendMessage("http:post", {
-      url: options.url,
-      headers: options.headers
-      ,
-      responseType: options.responseType,
-      data: options.data
-    })
+    url: options.url,
+    headers: options.headers,
+    responseType: options.responseType,
+    data: options.data
+  })
 }
 
-
-document.addEventListener("request:http-get", async ({ detail }) => {
-    document.dispatchEvent(new CustomEvent('response:http-get', {
-      detail: await get(detail).then((res) => {
-        return {
-          id: detail.id,
-          ok: true,
-          res
-        }
-      }).catch(err => {
-        return {
-          id: detail.id,
-          ok: false,
-          res: err
-        }
-      })
+document.addEventListener("request:http-get", async ({ detail }: any) => {
+  document.dispatchEvent(
+    new CustomEvent("response:http-get", {
+      detail: await get(detail)
+        .then((res) => {
+          return {
+            id: detail.id,
+            ok: true,
+            res
+          }
+        })
+        .catch((err) => {
+          return {
+            id: detail.id,
+            ok: false,
+            res: err
+          }
+        })
     })
-    )
+  )
 })
 
-document.addEventListener("request:http-post", async ({ detail }) => {
-    document.dispatchEvent(new CustomEvent('response:http-post', {
-      detail: await post(detail).then((res) => {
-        return {
-          id: detail.id,
-          ok: true,
-          res
-        }
-      }).catch(err => {
-        return {
-          id: detail.id,
-          ok: false,
-          res: err
-        }
-      })
+document.addEventListener("request:http-post", async ({ detail }: any) => {
+  document.dispatchEvent(
+    new CustomEvent("response:http-post", {
+      detail: await post(detail)
+        .then((res) => {
+          return {
+            id: detail.id,
+            ok: true,
+            res
+          }
+        })
+        .catch((err) => {
+          return {
+            id: detail.id,
+            ok: false,
+            res: err
+          }
+        })
     })
-    )
+  )
 })
-
 ;(() => {
   console.log("start inject")
-var s = document.createElement('script');
-  s.src = chrome.runtime.getURL('dist/contentScripts/inject.global.js');
-  s.onload = function() {
-      this.remove();
-  };
-  (document.head || document.documentElement).appendChild(s);
+  const s = document.createElement("script")
+  // eslint-disable-next-line functional/immutable-data
+  s.src = browser.runtime.getURL("dist/contentScripts/inject.global.js")
+  // eslint-disable-next-line functional/immutable-data
+  s.onload = () => s.remove()
+  ;(document.head || document.documentElement).appendChild(s)
 })()

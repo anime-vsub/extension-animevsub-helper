@@ -113,21 +113,9 @@ async function handleMessage(payload: HMRPayload) {
     }
     case 'full-reload':
       notifyListeners('vite:beforeFullReload', payload)
-      if (payload.path && payload.path.endsWith('.html')) {
-        // if html file is edited, only reload the page if the browser is
-        // currently on that page.
-        const pagePath = decodeURI(location.pathname)
-        const payloadPath = base + payload.path.slice(1)
-        if (
-          pagePath === payloadPath
-          || payload.path === '/index.html'
-          || (pagePath.endsWith('/') && `${pagePath}index.html` === payloadPath)
-        )
-          location.reload()
-      }
-      else {
+     
         location.reload()
-      }
+      
       break
     case 'prune':
       notifyListeners('vite:beforePrune', payload)
