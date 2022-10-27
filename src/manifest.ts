@@ -15,14 +15,6 @@ export async function getManifest() {
     name: pkg.displayName || pkg.name,
     version: pkg.version,
     description: pkg.description,
-    action: {
-      default_icon: "./assets/icon-512.png",
-      default_popup: "./dist/popup/index.html"
-    },
-    options_ui: {
-      page: "./dist/options/index.html",
-      open_in_tab: true
-    },
     background: {
       service_worker: "./dist/background/index.mjs"
     },
@@ -35,7 +27,8 @@ export async function getManifest() {
       "tabs",
       "storage",
       "activeTab",
-      "scripting"
+      "scripting",
+      "cookies"
     ],
     host_permissions: ["*://*/*"],
     content_scripts: [

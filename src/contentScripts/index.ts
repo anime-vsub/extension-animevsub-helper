@@ -4,6 +4,7 @@
 
 import { sendMessage } from "webext-bridge"
 import browser from "webextension-polyfill"
+import { base64ToArrayBuffer } from "~/logic/base64ToArrayBuffer"
 
 import type { OptionsHttpGet, OptionsHttpPost } from "~/background"
 
@@ -28,6 +29,8 @@ document.addEventListener("request:http-get", async ({ detail }: any) => {
     new CustomEvent("response:http-get", {
       detail: await get(detail)
         .then((res) => {
+          if (detail.responseType === "arraybuffer")
+          res.data = base64ToArrayBuffer(res.data)
           return {
             id: detail.id,
             ok: true,
@@ -50,6 +53,8 @@ document.addEventListener("request:http-post", async ({ detail }: any) => {
     new CustomEvent("response:http-post", {
       detail: await post(detail)
         .then((res) => {
+          if (detail.responseType === "arraybuffer")
+          res.data = base64ToArrayBuffer(res.data)
           return {
             id: detail.id,
             ok: true,

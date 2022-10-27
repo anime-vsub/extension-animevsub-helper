@@ -13,7 +13,6 @@ fs.copySync(r('assets'), r('extension/assets'))
 writeManifest()
 
 if (isDev) {
-  stubIndexHtml()
   chokidar.watch([r('src/manifest.ts'), r('package.json')])
     .on('change', () => {
       writeManifest()

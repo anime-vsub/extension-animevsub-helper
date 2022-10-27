@@ -1,6 +1,9 @@
 /* eslint-disable no-undef */
 // eslint-disable-next-line n/no-unpublished-import
 import { onMessage } from "webext-bridge"
+import { arrayBufferToBase64 } from "~/logic/arrayBufferToBase64"
+
+import { serialize } from "cookie"
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type OptionsHttpGet = {
@@ -12,19 +15,20 @@ onMessage<OptionsHttpGet, string>(
   "http:get",
   async ({ data: { url, headers, responseType } }) => {
     const res = await fetch(url, {
-      headers: new Headers(headers)
+      headers: new Headers(headers), credentials: 'include'
     })
 
     return {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       // eslint-disable-next-line n/no-unsupported-features/es-builtins
-      headers: Object.fromEntries(res.headers.entries()),
+      headers: Object.fromEntries((await mergeSetCookie(res.headers , res.url)).entries()),
       data:
         responseType === "arraybuffer"
-          ? await res.arrayBuffer()
+          ? await res.arrayBuffer().then(arrayBufferToBase64)
           : await res.text(),
-      url: res.url
+      url: res.url,
+      status: res.status,
     }
   }
 )
@@ -46,19 +50,34 @@ onMessage<OptionsHttpPost, string>(
     const res = await fetch(url, {
       method: "POST",
       headers: new Headers(headers),
-      body: form
+      body: form, credentials: 'include'
     })
 
     return {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       // eslint-disable-next-line n/no-unsupported-features/es-builtins
-      headers: Object.fromEntries(res.headers.entries()),
+      headers: Object.fromEntries((await mergeSetCookie(res.headers , res.url)).entries()),
       data:
         responseType === "arraybuffer"
-          ? await res.arrayBuffer()
+          ? await res.arrayBuffer().then(arrayBufferToBase64)
           : await res.text(),
-      url: res.url
+      url: res.url,
+      status: res.status,
     }
   }
 )
+
+async function mergeSetCookie(headers: Headers, url: string) {
+  // not merge; 
+  const cookies = await chrome.cookies.getAll({url});
+  headers = new Headers(headers)
+  
+  headers.set("set-cookie", 
+cookies.map(item => {
+  return (serialize(item.name, item.value, {...item,sameSite: 'none',...item.expirationDate?{expires: new Date(Date.now() + item. expirationDate)}: {}}))
+}).join(",")
+)
+
+return headers
+}
