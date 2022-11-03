@@ -1,8 +1,8 @@
 {
-  "name": "vitesse-webext",
-  "displayName": "Vitesse WebExt",
+  "name": "AnimeVsub Helper",
+  "displayName": "AnimeVsub Helper",
   "version": "0.0.2",
-  "description": "[description]",
+  "description": "Extension add API helper for AnimeVsub",
   "private": true,
   "scripts": {
     "dev": "npm run clear && cross-env NODE_ENV=development run-p dev:*",
