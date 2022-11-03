@@ -23,7 +23,8 @@
     "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
     "clear": "rimraf extension extension.*",
     "lint": "eslint 'src/**/*.{json,ts,js,vue}'",
-    "test": "vitest test"
+    "test": "vitest test",
+    "release": "bumpp package.json --commit --tag --push"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.23.1",
@@ -39,6 +40,7 @@
     "@vue/compiler-sfc": "^3.2.35",
     "@vue/test-utils": "^2.0.0",
     "@vueuse/core": "^8.5.0",
+    "bumpp": "^8.2.1",
     "chokidar": "^3.5.3",
     "cookie": "^0.5.0",
     "cross-env": "^7.0.3",
