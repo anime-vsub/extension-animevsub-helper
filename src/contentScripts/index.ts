@@ -78,5 +78,6 @@ document.addEventListener("request:http-post", async ({ detail }: any) => {
   s.src = browser.runtime.getURL("dist/contentScripts/inject.global.js")
   // eslint-disable-next-line functional/immutable-data
   s.onload = () => s.remove()
-  ;(document.head || document.documentElement).appendChild(s)
+  ;(document.head || document.documentElement).prepend(s)
+  // where id === uuid then found 
 })()
