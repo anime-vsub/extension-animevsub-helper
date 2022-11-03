@@ -27,8 +27,8 @@ interface HttpResponse {
 }
 
 interface Http {
-  get: (url: string, options: GetOptions) => HttpResponse
-  post: (url: string, options: PostOptions) => HttpResponse
+  get: (options: GetOptions) => HttpResponse
+  post: (options: PostOptions) => HttpResponse
 }
 ```
 
