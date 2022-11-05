@@ -35,6 +35,13 @@ jobs:
           pnpm pack:zip
           pnpm pack:crx
           pnpm pack:xpi
+          
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.0.1
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+  
       - name: Release
         uses: softprops/action-gh-release@v0.1.14
         with:
@@ -42,3 +49,4 @@ jobs:
             extension-animevsub-*.tgz
             extension.*
             key.pem
+          body: ${{ steps.changelog.outputs.changelog }}
