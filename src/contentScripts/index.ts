@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-undef */
-/* eslint-disable n/no-unpublished-import */
 
 import { sendMessage } from "webext-bridge"
 import browser from "webextension-polyfill"
-import { base64ToArrayBuffer } from "~/logic/base64ToArrayBuffer"
 
 import type { OptionsHttpGet, OptionsHttpPost } from "~/background"
+import { base64ToArrayBuffer } from "~/logic/base64ToArrayBuffer"
 
 function get(options: OptionsHttpGet) {
   return sendMessage("http:get", {
@@ -30,7 +29,8 @@ document.addEventListener("request:http-get", async ({ detail }: any) => {
       detail: await get(detail)
         .then((res) => {
           if (detail.responseType === "arraybuffer")
-          res.data = base64ToArrayBuffer(res.data)
+            // eslint-disable-next-line functional/immutable-data
+            res.data = base64ToArrayBuffer(res.data)
           return {
             id: detail.id,
             ok: true,
@@ -54,7 +54,8 @@ document.addEventListener("request:http-post", async ({ detail }: any) => {
       detail: await post(detail)
         .then((res) => {
           if (detail.responseType === "arraybuffer")
-          res.data = base64ToArrayBuffer(res.data)
+            // eslint-disable-next-line functional/immutable-data
+            res.data = base64ToArrayBuffer(res.data)
           return {
             id: detail.id,
             ok: true,
@@ -79,5 +80,5 @@ document.addEventListener("request:http-post", async ({ detail }: any) => {
   // eslint-disable-next-line functional/immutable-data
   s.onload = () => s.remove()
   ;(document.head || document.documentElement).prepend(s)
-  // where id === uuid then found 
+  // where id === uuid then found
 })()

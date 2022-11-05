@@ -8,7 +8,7 @@ const forbiddenProtocols = [
 ]
 
 export function isForbiddenUrl(url: string): boolean {
-  return forbiddenProtocols.some(protocol => url.startsWith(protocol))
+  return forbiddenProtocols.some((protocol) => url.startsWith(protocol))
 }
 
 // eslint-disable-next-line no-undef

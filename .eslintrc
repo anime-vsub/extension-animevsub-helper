@@ -1,3 +1,6 @@
 {
-  "extends": "@tachibana-shin"
+  "extends": "@tachibana-shin",
+  "rules": {
+    "n/no-unpublished-import": "off"
+  }
 }
