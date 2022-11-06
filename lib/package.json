@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "cookie": "^0.5.0",
+    "js-base64": "^3.7.2"
+  },
+  "devDependencies": {
+    "web-ext": "^7.2.0",
+    "webext-bridge": "^5.0.5",
+    "webextension-polyfill": "^0.10.0"
+  }
+}
