@@ -1,9 +1,9 @@
-name: Release
+name: Release manifest-v3
 
 on:
   push:
     tags:
-      - "v*.*.*"
+      - mv3_v*.*.*
     paths: 
       - "package.json"
 
@@ -29,12 +29,10 @@ jobs:
       - name: Pack
         run: |
           pnpm i
+          cd manifest-v3
           pnpm clear
           pnpm build
-          pnpm pack
-          pnpm pack:zip
-          pnpm pack:crx
-          pnpm pack:xpi
+          pnpm run pack
           
       - name: Generate changelog
         id: changelog
@@ -46,7 +44,5 @@ jobs:
         uses: softprops/action-gh-release@v0.1.14
         with:
           files: |
-            extension-animevsub-*.tgz
-            extension.*
-            key.pem
+            manifest-v3/mv3-extension.*
           body: ${{ steps.changelog.outputs.changelog }}
