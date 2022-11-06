@@ -7,7 +7,7 @@
     "pack": "pnpm build && pnpm -r run pack",
     "release:mv2": "cd manifest-v2 && pnpm release",
     "release:mv3": "cd manifest-v3 && pnpm release",
-    "release": "pnpm -r release"
+    "release": "pnpm release:mv2 && pnpm release:mv3"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.6",
