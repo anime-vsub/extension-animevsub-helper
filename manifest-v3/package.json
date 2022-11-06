@@ -1,0 +1,36 @@
+{
+  "name": "animevsub-helper",
+  "displayName": "AnimeVsub Helper",
+  "version": "0.0.7",
+  "description": "Extension add API helper for AnimeVsub",
+  "private": true,
+  "scripts": {
+    "dev": "npm run clear && cross-env NODE_ENV=development run-p dev:*",
+    "dev:prepare": "tsx scripts/prepare.ts",
+    "dev:js": "npm run build:js -- --mode development",
+    "dev:inject": "npm run build:inject -- --mode development",
+    "dev:bg": "tsup --watch ./src",
+    "build": "cross-env NODE_ENV=production run-s clear build:prepare build:js build:inject build:bg",
+    "build:prepare": "tsx scripts/prepare.ts",
+    "build:js": "vite build --config vite.config.content.ts",
+    "build:inject": "vite build --config vite.config.content-inject.ts",
+    "build:bg": "tsup",
+    "pack": "cross-env NODE_ENV=production run-p pack:*",
+    "pack:zip": "rimraf mv3-extension.zip && jszip-cli add extension/* -o ./mv3-extension.zip",
+    "pack:crx": "crx pack extension -o ./mv3-extension.crx",
+    "pack:xpi": "cross-env WEB_EXT_ARTIFACTS_DIR=./ web-ext build --source-dir ./extension --filename mv3-extension.xpi --overwrite-dest",
+    "start:chromium": "web-ext run --source-dir ./extension --target=chromium",
+    "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
+    "clear": "rimraf extension mv3-extension.*",
+    "release": "bumpp package.json --commit \"[mv3] chore: release v%s\" --tag --push"
+  },
+  "devDependencies": {
+    "@nodelib/fs.scandir": "^2.1.5",
+    "bumpp": "^8.2.1",
+    "fs-extra": "^10.1.0",
+    "tsup": "^5.12.9",
+    "vite": "2.9.9",
+    "webext-bridge": "^5.0.5",
+    "webextension-polyfill": "^0.10.0"
+  }
+}
