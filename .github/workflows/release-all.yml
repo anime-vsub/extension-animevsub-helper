@@ -1,0 +1,46 @@
+name: Release all
+
+on:
+  push:
+    tags:
+      - v*.*.*
+    paths: 
+      - "package.json"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Pack
+        run: |
+          pnpm i
+          pnpm run pack
+          
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.0.1
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Release
+        uses: softprops/action-gh-release@v0.1.14
+        with:
+          files: |
+            manifest-v2/mv2-extension.*
+            manifest-v3/mv3-extension.*
+          body: ${{ steps.changelog.outputs.changelog }}

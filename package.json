@@ -1,4 +1,5 @@
 {
+  "version": "0.0.1",
   "scripts": {
     "lint": "eslint lib/ --ext ts",
     "format": "prettier -w lib/",
@@ -7,12 +8,13 @@
     "pack": "pnpm build && pnpm -r run pack",
     "release:mv2": "cd manifest-v2 && pnpm release",
     "release:mv3": "cd manifest-v3 && pnpm release",
-    "release": "pnpm release:mv2 && pnpm release:mv3"
+    "release": "tsx ./scripts/release.ts"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.6",
     "@tachibana-shin/eslint-config": "^1.0.7",
     "@types/node": "^17.0.35",
+    "@types/semver": "^7.3.13",
     "chokidar": "^3.5.3",
     "cross-env": "^7.0.3",
     "crx": "^5.0.1",
