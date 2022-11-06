@@ -29,6 +29,7 @@ function writeManifest() {
   execSync("npx esno ./scripts/manifest.ts", { stdio: "inherit" })
 }
 
+fs.copySync(r("../lib/assets"), r("extension/assets"))
 writeManifest()
 
 if (isDev) {

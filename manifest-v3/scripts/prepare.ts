@@ -4,14 +4,14 @@ import { execSync } from "child_process"
 import chokidar from "chokidar"
 import fs from "fs-extra"
 
-import { isDev, log, r } from "./utils"
+import { isDev, r } from "./utils"
 
 function writeManifest() {
   execSync("npx esno ./scripts/manifest.ts", { stdio: "inherit" })
 }
 
 fs.ensureDirSync(r("extension"))
-fs.copySync(r("assets"), r("extension/assets"))
+fs.copySync(r("../lib/assets"), r("extension/assets"))
 writeManifest()
 
 if (isDev) {

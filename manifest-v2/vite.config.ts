@@ -25,7 +25,7 @@ export const sharedConfig: UserConfig = {
       enforce: "post",
       apply: "build",
       transformIndexHtml(html, { path }) {
-        return html.replace(/"\/assets\//g, `"${relative(dirname(path), "/assets")}/`)
+        return html.replace(/"\/assets\//g, `"${relative(dirname(path), "../lib/assets")}/`)
       }
     }
   ]
