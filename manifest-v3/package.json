@@ -22,7 +22,7 @@
     "start:chromium": "web-ext run --source-dir ./extension --target=chromium",
     "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
     "clear": "rimraf extension mv3-extension.*",
-    "release": "bumpp package.json --commit \"[mv3] chore: release v%s\" --tag \"mv3-v%s\" --push"
+    "release": "bumpp package.json --commit \"[mv3] chore: release v%s\" --push"
   },
   "devDependencies": {
     "@nodelib/fs.scandir": "^2.1.5",
