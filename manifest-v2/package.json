@@ -23,7 +23,7 @@
     "start:chromium": "web-ext run --source-dir ./extension --target=chromium",
     "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
     "clear": "rimraf extension/dist extension/manifest.json mv2-extension.*",
-    "release": "bumpp package.json --commit \"[mv2] chore: release v%s\" --push"
+    "release": "bumpp package.json --commit \"[mv2] chore: release v%s\" --tag \"mv2_v%s\" --push"
   },
   "devDependencies": {
     "fs-extra": "^10.1.0",
