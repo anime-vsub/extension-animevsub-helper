@@ -1,6 +1,6 @@
 # Extension AnimeVsub Helper
 
-[![GitHub license](https://img.shields.io/github/license/anime-vsub/app)](https://github.com/anime-vsub/desktop-web/blob/main/LICENSE) 
+[![GitHub license](https://img.shields.io/github/license/anime-vsub/extension-animevsub-helper)](https://github.com/anime-vsub/extension-animevsub-helper/blob/main/LICENSE) 
 ![Release](https://img.shields.io/github/package-json/v/anime-vsub/extension-animevsub-helper?color=b)
 
 > Extension is helper for animevsub [dekstop website](https://github.com/anime-vsub/desktop-web).
