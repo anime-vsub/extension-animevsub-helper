@@ -7,7 +7,7 @@ import fs from "fs-extra"
 import { isDev, r } from "./utils"
 
 function writeManifest() {
-  execSync("npx esno ./scripts/manifest.ts", { stdio: "inherit" })
+  execSync("npx tsx ./scripts/manifest.ts", { stdio: "inherit" })
 }
 
 fs.ensureDirSync(r("extension"))
