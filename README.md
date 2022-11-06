@@ -6,7 +6,7 @@
 > Extension is helper for animevsub [dekstop website](https://github.com/anime-vsub/desktop-web).
 > *The web version of the app won't work without this extension*
 
-Although this extension is called `AnimeVsub Helper` it can provide complete API cors for any website.  Here is the API that this extension embeds in websites:
+Although this extension is called `AnimeVsub Helper` it can provide complete API cors for any website.
 
 
 ## Install
@@ -17,7 +17,8 @@ Although this extension is called `AnimeVsub Helper` it can provide complete API
   <span style="font-weight: 500">Edge</span>
 </a>
 
-## window.Http
+## Inject window.Http
+Here is the API that this extension embeds in websites:
 ```ts
 interface GetOptions {
   url: string
@@ -45,3 +46,21 @@ interface Http {
 ```
 
 Use them by calling `window.Http.get` or `window.Http.post` in your website
+
+
+## Development
+
+1. Run this script:
+```bash
+pnpm i
+```
+2. Next, For manifest v2 run `cd manifest-v2`. For manifest v3 run `cd manifest-v3`
+3. Run:
+```bash
+pnpm dev
+```
+4. New Terminal run:
+```bash
+pnpm start:chrome # open chrome
+pnpm start:firefox # open firefox
+```
