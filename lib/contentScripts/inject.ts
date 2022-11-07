@@ -3,11 +3,15 @@ import type { OptionsHttpGet, OptionsHttpPost } from "../background"
 
 import type { DetailCustomEvent } from "."
 
+const randomUUID =
+  (typeof crypto !== "undefined" ? crypto.randomUUID : undefined) ??
+  (() => (+Math.random().toString().replace(".", "")).toString(34))
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/immutable-data
 ;(window as any).Http = {
   get(options: OptionsHttpGet) {
     return new Promise((resolve, reject) => {
-      const id = crypto.randomUUID()
+      const id = randomUUID()
       const handler = (({ detail }: CustomEvent<DetailCustomEvent>) => {
         if (detail.id === id) {
           if (detail.ok) resolve(detail.res)
@@ -25,7 +29,7 @@ import type { DetailCustomEvent } from "."
   },
   post(options: OptionsHttpPost) {
     return new Promise((resolve, reject) => {
-      const id = crypto.randomUUID()
+      const id = randomUUID()
       const handler = (({ detail }: CustomEvent<DetailCustomEvent>) => {
         if (detail.id === id) {
           if (detail.ok) resolve(detail.res)
