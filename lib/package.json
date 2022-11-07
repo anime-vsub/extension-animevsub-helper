@@ -1,11 +1,18 @@
 {
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
+    "@tachibana-shin/webext-bridge": "6.0.0-rc3",
     "cookie": "^0.5.0",
     "js-base64": "^3.7.2"
   },
   "devDependencies": {
+    "@types/cookie": "^0.5.1",
+    "vitest": "^0.24.5",
     "web-ext": "^7.2.0",
-    "webext-bridge": "^5.0.5",
+    "webext-bridge": "6.0.0-rc3",
     "webextension-polyfill": "^0.10.0"
   }
 }

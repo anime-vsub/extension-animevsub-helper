@@ -40,17 +40,23 @@ importers:
 
   lib:
     specifiers:
+      '@tachibana-shin/webext-bridge': 6.0.0-rc3
+      '@types/cookie': ^0.5.1
       cookie: ^0.5.0
       js-base64: ^3.7.2
+      vitest: ^0.24.5
       web-ext: ^7.2.0
-      webext-bridge: ^5.0.5
+      webext-bridge: 6.0.0-rc3
       webextension-polyfill: ^0.10.0
     dependencies:
+      '@tachibana-shin/webext-bridge': 6.0.0-rc3
       cookie: 0.5.0
       js-base64: 3.7.2
     devDependencies:
+      '@types/cookie': 0.5.1
+      vitest: 0.24.5
       web-ext: 7.3.1
-      webext-bridge: 5.0.5
+      webext-bridge: 6.0.0-rc3
       webextension-polyfill: 0.10.0
 
   manifest-v2:
@@ -308,6 +314,16 @@ packages:
       - tsutils
     dev: true
 
+  /@tachibana-shin/webext-bridge/6.0.0-rc3:
+    resolution: {integrity: sha512-V2wXCXKLJ7sh6YRx9r7ELGMbAHifSHtoIwpVgkp94uLrtqW2IPne4varv3rz7BBvqYRZWENPecg8D5eLnOjEdg==}
+    dependencies:
+      '@types/webextension-polyfill': 0.8.3
+      nanoevents: 6.0.2
+      serialize-error: 9.1.1
+      tiny-uid: 1.1.2
+      webextension-polyfill: 0.9.0
+    dev: false
+
   /@tootallnate/once/2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
@@ -321,6 +337,10 @@ packages:
 
   /@types/chai/4.3.3:
     resolution: {integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==}
+    dev: true
+
+  /@types/cookie/0.5.1:
+    resolution: {integrity: sha512-COUnqfB2+ckwXXSFInsFdOAWQzCCx+a5hq2ruyj+Vjund94RJQd4LG2u9hnvJrTgunKAaax7ancBYlDrNYxA0g==}
     dev: true
 
   /@types/http-cache-semantics/4.0.1:
@@ -357,7 +377,6 @@ packages:
 
   /@types/webextension-polyfill/0.8.3:
     resolution: {integrity: sha512-GN+Hjzy9mXjWoXKmaicTegv3FJ0WFZ3aYz77Wk8TMp1IY3vEzvzj1vnsa0ggV7vMI1i+PUxe4qqnIJKCzf9aTg==}
-    dev: true
 
   /@types/yauzl/2.10.0:
     resolution: {integrity: sha512-Cn6WYCm0tXv8p6k+A8PvbDG763EDpBoTzHdA+Q/MF6H3sapGjCm9NzoaJncJS9tUKSuCoDs9XHxYYsQDgxR6kw==}
@@ -3531,7 +3550,6 @@ packages:
   /nanoevents/6.0.2:
     resolution: {integrity: sha512-FRS2otuFcPPYDPYViNWQ42+1iZqbXydinkRHTHFxrF4a1CpBfmydR9zkI44WSXAXCyPrkcGtPk5CnpW6Y3lFKQ==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
-    dev: true
 
   /nanoid/3.3.4:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
@@ -4334,7 +4352,6 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
       type-fest: 2.19.0
-    dev: true
 
   /set-immediate-shim/1.0.1:
     resolution: {integrity: sha512-Li5AOqrZWCVA2n5kryzEmqai6bKSIvpz5oUJHPVj6+dsbD3X1ixtsY5tEnsaNpH3pFAHmG8eIHUrtEtohrg+UQ==}
@@ -4697,7 +4714,6 @@ packages:
 
   /tiny-uid/1.1.2:
     resolution: {integrity: sha512-0beRFXR+fv4C40ND2PqgNjq6iyB1dKXciKJjslLw0kPYCcR82aNd2b+Tt2yy06LimIlvtoehgvrm/fUZCutSfg==}
-    dev: true
 
   /tinybench/2.3.1:
     resolution: {integrity: sha512-hGYWYBMPr7p4g5IarQE7XhlyWveh1EKhy4wUBS1LrHXCKYgvz+4/jCqgmJqZxxldesn05vccrtME2RLLZNW7iA==}
@@ -4833,7 +4849,6 @@ packages:
   /type-fest/2.19.0:
     resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
     engines: {node: '>=12.20'}
-    dev: true
 
   /typedarray-to-buffer/3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
@@ -4981,6 +4996,48 @@ packages:
       fsevents: 2.3.2
     dev: true
 
+  /vitest/0.24.5:
+    resolution: {integrity: sha512-zw6JhPUHtLILQDe5Q39b/SzoITkG+R7hcFjuthp4xsi6zpmfQPOZcHodZ+3bqoWl4EdGK/p1fuMiEwdxgbGLOA==}
+    engines: {node: '>=v14.16.0'}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@vitest/browser': '*'
+      '@vitest/ui': '*'
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+    dependencies:
+      '@types/chai': 4.3.3
+      '@types/chai-subset': 1.3.3
+      '@types/node': 18.11.9
+      chai: 4.3.6
+      debug: 4.3.4
+      local-pkg: 0.4.2
+      strip-literal: 0.4.2
+      tinybench: 2.3.1
+      tinypool: 0.3.0
+      tinyspy: 1.0.2
+      vite: 3.2.2
+    transitivePeerDependencies:
+      - less
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+    dev: true
+
   /vitest/0.24.5_jsdom@20.0.2:
     resolution: {integrity: sha512-zw6JhPUHtLILQDe5Q39b/SzoITkG+R7hcFjuthp4xsi6zpmfQPOZcHodZ+3bqoWl4EdGK/p1fuMiEwdxgbGLOA==}
     engines: {node: '>=v14.16.0'}
@@ -5106,13 +5163,22 @@ packages:
       webextension-polyfill: 0.9.0
     dev: true
 
+  /webext-bridge/6.0.0-rc3:
+    resolution: {integrity: sha512-UIJWfUf3Z2Rq9JDsMSJv65DL5FqtaO40FRmFBoOiGNH7fLpiOjvVuzg5V/2lLJcnnDGLf4lmp8Y76pSapsa5Jw==}
+    dependencies:
+      '@types/webextension-polyfill': 0.8.3
+      nanoevents: 6.0.2
+      serialize-error: 9.1.1
+      tiny-uid: 1.1.2
+      webextension-polyfill: 0.9.0
+    dev: true
+
   /webextension-polyfill/0.10.0:
     resolution: {integrity: sha512-c5s35LgVa5tFaHhrZDnr3FpQpjj1BB+RXhLTYUxGqBVN460HkbM8TBtEqdXWbpTKfzwCcjAZVF7zXCYSKtcp9g==}
     dev: true
 
   /webextension-polyfill/0.9.0:
     resolution: {integrity: sha512-LTtHb0yR49xa9irkstDxba4GATDAcDw3ncnFH9RImoFwDlW47U95ME5sn5IiQX2ghfaECaf6xyXM8yvClIBkkw==}
-    dev: true
 
   /webidl-conversions/7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
