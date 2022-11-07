@@ -5,8 +5,7 @@ import { sendMessage } from "@tachibana-shin/webext-bridge/content-script"
 import browser from "webextension-polyfill"
 
 import type {
-  OptionsHttpGet,
-  OptionsHttpPost,
+  RequestOption,
   ResponseHttp
 } from "../background"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
@@ -14,12 +13,6 @@ import { randomUUID } from "../logic/randomUUID"
 
 import type { DetailCustomEvent_sendToIndex } from "./inject"
 
-function get(options: OptionsHttpGet) {
-  return sendMessage("http:get", options) as unknown as Promise<ResponseHttp>
-}
-function post(options: OptionsHttpPost) {
-  return sendMessage("http:post", options) as unknown as Promise<ResponseHttp>
-}
 
 export interface DetailCustomEvent_sendToInject {
   id: string
@@ -27,43 +20,21 @@ export interface DetailCustomEvent_sendToInject {
   res: ResponseHttp
 }
 
-function createListenerRequest<
-  Options extends OptionsHttpGet | OptionsHttpPost
->(type: "get" | "post", fn: (options: Options) => Promise<ResponseHttp>) {
+function createListenerRequest() {
   return (async ({ detail }: CustomEvent<DetailCustomEvent_sendToIndex>) => {
-    // eslint-disable-next-line functional/no-let
-    let options: Options
-
-    if (detail.req.signal) {
-      if (detail.req.signal.aborted) {
-        options = {
-          ...detail.req,
-          signalId: true
-        } as Options
-      } else {
-        const signalId = randomUUID()
-        // eslint-disable-next-line functional/immutable-data
-        detail.req.signal.onabort = () =>
-          sendMessage(`http:${type}:aborted=${signalId}`, {})
-        options = {
-          ...detail.req,
-          signalId
-        } as Options
-      }
-
-      // eslint-disable-next-line functional/immutable-data
-      delete detail.req.signal
-    } else {
-      options = detail.req as Options
-    }
-
     document.dispatchEvent(
-      new CustomEvent<DetailCustomEvent_sendToInject>(`response:http-${type}`, {
-        detail: await fn(options)
+      new CustomEvent<DetailCustomEvent_sendToInject>("http:response", {
+        detail: await sendMessage("http:request", detail.req)
           .then((res): DetailCustomEvent_sendToInject => {
-            if (detail.req.responseType === "arraybuffer")
-              // eslint-disable-next-line functional/immutable-data
-              res.data = base64ToArrayBuffer(res.data as string)
+            switch (detail.req.responseType) {
+              case "arraybuffer":
+                res.data = base64ToArrayBuffer(res.data as string)
+                break
+              case "json":
+                res.data = JSON.parse(res.data as string)
+                break
+            }
+              
             return {
               id: detail.id,
               ok: true,
@@ -82,11 +53,11 @@ function createListenerRequest<
   }) as unknown as EventListenerOrEventListenerObject
 }
 
-document.addEventListener("request:http-get", createListenerRequest("get", get))
-document.addEventListener(
-  "request:http-post",
-  createListenerRequest("post", post)
-)
+document.addEventListener("http:request", createListenerRequest())
+document.addEventListener("http:aborted", ({ detail: { signalId } }: CustomEvent<{signalId: string}>) => {
+    sendMessage("http:aborted", { signalId })
+  })
+
 ;(() => {
   console.log("start inject")
   const s = document.createElement("script")

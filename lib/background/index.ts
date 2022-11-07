@@ -15,21 +15,51 @@ export interface ResponseHttp {
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type OptionsHttpGet = {
+export type RequestOption = {
   url: string
+  method?: "get" | "post"
   headers?: Record<string, string>
   responseType?: "arraybuffer"
   signalId?: string | true
+  data?: Record<string, string> | string
 }
-export type OptionsHttpPost = OptionsHttpGet & {
-  data?: Record<string, string>
+
+const eventsAbort = new class EventsAbort {
+  readonly private store = new Map<string, () => void>()
+  
+  constructor() {
+    
+        onMessage("http:aborted", ({ data: { signalId } }) => {
+          eventsAbort.store.get(signalId)?.()
+        })
+  }
+  
+  on(id: string, fn: () => void) {
+    this.store.set(id, fn)
+    
+    return () => this.store.delete(id)
+  }
 }
 
 async function sendRequest(
-  type: "get" | "post",
-  { url, headers, responseType, signalId }: OptionsHttpGet,
-  extendsOptionFetch?: RequestInit
+  { url, headers, responseType, signalId, method, data }: RequestOption
 ): Promise<ResponseHttp> {
+  let form : FormData | string | undefined
+    if (data) {
+      if (typeof data === "object") {
+        form = new FormData()
+    
+        Object.entries(data ?? {}).forEach(([key, val]) =>
+          form.append(key, val)
+        )
+      }else {
+        form = data
+      }
+    }
+  
+  
+  
+  
   // eslint-disable-next-line functional/no-let
   let signal: AbortSignal | undefined
   // eslint-disable-next-line functional/no-let
@@ -42,62 +72,50 @@ async function sendRequest(
       controller.abort()
     } else {
       // init abortcontroller
-      cancelAbort = onMessage(`http:${type}:aborted=${signalId}`, () => {
+      cancelAbort =eventsAbort.on(signalId, () => {
         controller.abort()
         cancelAbort?.()
       })
     }
   }
-  const res = await fetch(url, {
+  
+  
+  return fetch(url, {
     headers: new Headers(headers),
     credentials: "include",
     signal,
-    ...extendsOptionFetch
+    method,
+    body: form
   })
-    .then((result) => {
+    .then(async (res) => {
       cancelAbort?.()
-      return result
+      
+      return {
+        // eslint-disable-next-line n/no-unsupported-features/es-builtins
+        headers: Object.fromEntries(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          (await mergeSetCookie(res.headers, res.url)).entries()
+        ),
+        data:
+          responseType === "arraybuffer"
+            ? await res.arrayBuffer().then(arrayBufferToBase64)
+            : await res.text(),
+        url: res.url,
+        status: res.status
+      }
     })
     .catch((err) => {
       cancelAbort?.()
       // eslint-disable-next-line promise/no-return-wrap
-      return Promise.reject(err)
+     throw err
     })
 
-  return {
-    // eslint-disable-next-line n/no-unsupported-features/es-builtins
-    headers: Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      (await mergeSetCookie(res.headers, res.url)).entries()
-    ),
-    data:
-      responseType === "arraybuffer"
-        ? await res.arrayBuffer().then(arrayBufferToBase64)
-        : await res.text(),
-    url: res.url,
-    status: res.status
-  }
 }
 
 onMessage<OptionsHttpGet, string>(
-  "http:get",
-  ({ data }): Promise<ResponseHttp> => sendRequest("get", data)
-)
-onMessage<OptionsHttpPost, string>(
-  "http:post",
-  ({ data }): Promise<ResponseHttp> => {
-    const form = new FormData()
-
-    Object.entries(data.data ?? {}).forEach(([key, val]) =>
-      form.append(key, val)
-    )
-
-    return sendRequest("post", data, {
-      method: "POST",
-      body: form
-    })
-  }
+  "http:request",
+  ({ data }): Promise<ResponseHttp> => sendRequest(data)
 )
 
 async function mergeSetCookie(headers: Headers, url: string) {

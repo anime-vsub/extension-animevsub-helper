@@ -16,12 +16,15 @@ export interface ClientOptionHttpPost
 
 export interface DetailCustomEvent_sendToIndex {
   id: string
-  req: ClientOptionHttpGet | ClientOptionHttpPost
+  req: (OptionsHttpGet | OptionsHttpPost) & {
+    method: string
+  }
 }
 function createPorter(
-  type: string,
+  method: string,
   options: ClientOptionHttpGet | ClientOptionHttpPost
 ) {
+  const rqOptions: typeof options & { method : typeof method } = {...options, method}
   return new Promise((resolve, reject) => {
     const id = randomUUID()
     const handler = (({
@@ -30,13 +33,31 @@ function createPorter(
       if (detail.id === id) {
         if (detail.ok) resolve(detail.res)
         else reject(detail.res)
-        document.removeEventListener(`response:http-${type}`, handler)
+        document.removeEventListener("http:response", handler)
       }
     }) as EventListenerOrEventListenerObject
-    document.addEventListener(`response:http-${type}`, handler)
+    document.addEventListener("http:response", handler)
+    
+    
+    
+      if (rqOptions.signal) {
+        if (rqOptions.signal.aborted) {
+          rqOptions.signalId = true
+        } else {
+          const signalId = randomUUID()
+          // eslint-disable-next-line functional/immutable-data
+          rqOptions.signal.onabort = () =>
+            document.dispatchEvent(new CustomEvent("http:aborted", { detail: { signalId } }))
+          rqOptions.signalId = signalId
+        }
+    
+        // eslint-disable-next-line functional/immutable-data
+        delete rqOptions.signal
+      }
+    
     document.dispatchEvent(
-      new CustomEvent<DetailCustomEvent_sendToIndex>(`response:http-${type}`, {
-        detail: { id, req: options }
+      new CustomEvent<DetailCustomEvent_sendToIndex>("http:request", {
+        detail: { id, req: rqOptions }
       })
     )
   })
