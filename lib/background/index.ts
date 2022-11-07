@@ -6,7 +6,7 @@ import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 
-export interface ResponseHttp {
+export interface RequestResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headers: Record<string, any>
   data: string | ArrayBuffer
@@ -17,49 +17,55 @@ export interface ResponseHttp {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RequestOption = {
   url: string
-  method?: "get" | "post"
+  method?: RequestInit["method"]
   headers?: Record<string, string>
-  responseType?: "arraybuffer"
+  responseType?: "arraybuffer" | "json" | "text"
   signalId?: string | true
   data?: Record<string, string> | string
 }
 
-const eventsAbort = new class EventsAbort {
-  readonly private store = new Map<string, () => void>()
-  
+const eventsAbort = new (class EventsAbort {
+  // eslint-disable-next-line @typescript-eslint/comma-spacing
+  private readonly store = new Map<string,() => void>()
+
   constructor() {
-    
-        onMessage("http:aborted", ({ data: { signalId } }) => {
-          eventsAbort.store.get(signalId)?.()
-        })
+    onMessage<{ signalId: string }>(
+      "http:aborted",
+      ({ data: { signalId } }) => {
+        eventsAbort.store.get(signalId)?.()
+      }
+    )
   }
-  
+
   on(id: string, fn: () => void) {
     this.store.set(id, fn)
-    
+
     return () => this.store.delete(id)
   }
-}
+})()
 
-async function sendRequest(
-  { url, headers, responseType, signalId, method, data }: RequestOption
-): Promise<ResponseHttp> {
-  let form : FormData | string | undefined
-    if (data) {
-      if (typeof data === "object") {
-        form = new FormData()
-    
-        Object.entries(data ?? {}).forEach(([key, val]) =>
-          form.append(key, val)
-        )
-      }else {
-        form = data
-      }
+async function sendRequest({
+  url,
+  headers,
+  responseType,
+  signalId,
+  method,
+  data
+}: RequestOption): Promise<RequestResponse> {
+  // eslint-disable-next-line functional/no-let
+  let form: FormData | string | undefined
+  if (data) {
+    if (typeof data === "object") {
+      form = new FormData()
+
+      Object.entries(data ?? {}).forEach(([key, val]) =>
+        (form as FormData).append(key, val)
+      )
+    } else {
+      form = data
     }
-  
-  
-  
-  
+  }
+
   // eslint-disable-next-line functional/no-let
   let signal: AbortSignal | undefined
   // eslint-disable-next-line functional/no-let
@@ -72,14 +78,13 @@ async function sendRequest(
       controller.abort()
     } else {
       // init abortcontroller
-      cancelAbort =eventsAbort.on(signalId, () => {
+      cancelAbort = eventsAbort.on(signalId, () => {
         controller.abort()
         cancelAbort?.()
       })
     }
   }
-  
-  
+
   return fetch(url, {
     headers: new Headers(headers),
     credentials: "include",
@@ -89,7 +94,7 @@ async function sendRequest(
   })
     .then(async (res) => {
       cancelAbort?.()
-      
+
       return {
         // eslint-disable-next-line n/no-unsupported-features/es-builtins
         headers: Object.fromEntries(
@@ -99,7 +104,9 @@ async function sendRequest(
         ),
         data:
           responseType === "arraybuffer"
-            ? await res.arrayBuffer().then(arrayBufferToBase64)
+            // eslint-disable-next-line operator-linebreak
+            ? // eslint-disable-next-line promise/no-nesting
+            await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status
@@ -107,15 +114,14 @@ async function sendRequest(
     })
     .catch((err) => {
       cancelAbort?.()
-      // eslint-disable-next-line promise/no-return-wrap
-     throw err
+      // eslint-disable-next-line functional/no-throw-statement
+      throw err
     })
-
 }
 
-onMessage<OptionsHttpGet, string>(
+onMessage<RequestOption, string>(
   "http:request",
-  ({ data }): Promise<ResponseHttp> => sendRequest(data)
+  ({ data }): Promise<RequestResponse> => sendRequest(data)
 )
 
 async function mergeSetCookie(headers: Headers, url: string) {
