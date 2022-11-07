@@ -1,5 +1,5 @@
 import { version as versionV2 } from "../manifest-v2/package.json"
-import { version as versionV3 } from "../manifest-v2/package.json"
+import { version as versionV3 } from "../manifest-v3/package.json"
 import packageJson from "../package.json"
 
 import max from "semver/ranges/max-satisfying"

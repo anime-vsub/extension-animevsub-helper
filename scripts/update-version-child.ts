@@ -1,5 +1,5 @@
 import packageV2 from "../manifest-v2/package.json"
-import packageV3 from "../manifest-v2/package.json"
+import packageV3 from "../manifest-v3/package.json"
 import { version } from "../package.json"
 
 import { resolve } from "path"
