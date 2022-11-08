@@ -24,9 +24,7 @@ function createPorter(method: string, options: ClientRequestOption) {
     const handler = (({
       detail
     }: CustomEvent<DetailCustomEvent_sendToInject>) => {
-      console.log(detail)
       detail = decodeDetail(detail)
-      console.log(detail)
       if (detail.id === id) {
         if (detail.ok) resolve(detail.res)
         else reject(detail.res)
