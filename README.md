@@ -13,8 +13,15 @@ Although this extension is called `AnimeVsub Helper` it can provide complete API
 
 <a href="https://microsoftedge.microsoft.com/addons/detail/endghpbficnpbadbdalhbpecpgdcojig" align="center" style="display: inline-block">
   <img src="./logos/edge.svg" width="42px">
-  <br>
-  <span style="font-weight: 500">Edge</span>
+  <p align="center" style="font-weight: 500">Edge</p>
+</a> &nbsp;
+<a href="https://addons.mozilla.org/vi/firefox/addon/animevsub-helper/" align="center" style="display: inline-block">
+  <img src="./logos/firefox.svg" width="42px">
+  <p align="center" style="font-weight: 500">Firefox</p>
+</a> &nbsp;
+<a href="https://addons.mozilla.org/vi/android/addon/animevsub-helper/" align="center" style="display: inline-block">
+  <img src="./logos/firefox.svg" width="42px">
+  <p align="center" style="font-weight: 500">Firefox Android</p>
 </a>
 
 ## Inject window.Http
