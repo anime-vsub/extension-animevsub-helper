@@ -2,9 +2,8 @@
 /* eslint-disable no-undef */
 import { version } from "../../package.json"
 import type { RequestOption, RequestResponse } from "../background"
-import { randomUUID } from "../logic/randomUUID"
 import { decodeDetail } from "../logic/encoder-detail"
-
+import { randomUUID } from "../logic/randomUUID"
 
 import type { DetailCustomEvent_sendToInject } from "."
 
@@ -22,7 +21,9 @@ function createPorter(method: string, options: ClientRequestOption) {
   }
   return new Promise<RequestResponse>((resolve, reject) => {
     const id = randomUUID()
-    const handler = (({ detail }: CustomEvent<DetailCustomEvent_sendToInject>) => {
+    const handler = (({
+      detail
+    }: CustomEvent<DetailCustomEvent_sendToInject>) => {
       console.log(detail)
       detail = decodeDetail(detail)
       console.log(detail)

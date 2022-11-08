@@ -21,37 +21,39 @@ document.addEventListener("http:request", (async ({
 }: CustomEvent<DetailCustomEvent_sendToIndex>) => {
   document.dispatchEvent(
     new CustomEvent<DetailCustomEvent_sendToInject>("http:response", {
-      detail: encodeDetail(await (
-        sendMessage(
-          "http:request",
-          detail.req
-        ) as unknown as Promise<RequestResponse>
-      )
-        .then((res): DetailCustomEvent_sendToInject => {
-          switch (detail.req.responseType) {
-            case "arraybuffer":
-              // eslint-disable-next-line functional/immutable-data
-              res.data = base64ToArrayBuffer(res.data as string)
-              break
-            case "json":
-              // eslint-disable-next-line functional/immutable-data
-              res.data = JSON.parse(res.data as string)
-              break
-          }
+      detail: encodeDetail(
+        await (
+          sendMessage(
+            "http:request",
+            detail.req
+          ) as unknown as Promise<RequestResponse>
+        )
+          .then((res): DetailCustomEvent_sendToInject => {
+            switch (detail.req.responseType) {
+              case "arraybuffer":
+                // eslint-disable-next-line functional/immutable-data
+                res.data = base64ToArrayBuffer(res.data as string)
+                break
+              case "json":
+                // eslint-disable-next-line functional/immutable-data
+                res.data = JSON.parse(res.data as string)
+                break
+            }
 
-          return {
-            id: detail.id,
-            ok: true,
-            res
-          }
-        })
-        .catch((err) => {
-          return {
-            id: detail.id,
-            ok: false,
-            res: err
-          }
-        }))
+            return {
+              id: detail.id,
+              ok: true,
+              res
+            }
+          })
+          .catch((err) => {
+            return {
+              id: detail.id,
+              ok: false,
+              res: err
+            }
+          })
+      )
     })
   )
 }) as unknown as EventListenerOrEventListenerObject)
