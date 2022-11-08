@@ -1,5 +1,5 @@
 {
-  "version": "0.0.11",
+  "version": "0.0.10",
   "scripts": {
     "lint": "eslint lib/ --ext ts",
     "format": "prettier -w lib/",
@@ -8,7 +8,7 @@
     "pack": "pnpm build && pnpm -r run pack",
     "release:mv2": "cd manifest-v2 && pnpm release",
     "release:mv3": "cd manifest-v3 && pnpm release",
-    "release": "tsx ./scripts/update-version-root.ts && bumpp package.json --commit --tags && tsx ./scripts/update-version-child.ts && git add manifest-v2/package.json && git add manifest-v3/package.json && git commit --amend && git push"
+    "release": "tsx ./scripts/update-version-root.ts && bumpp package.json --no-commit --no-tag --no-push && tsx ./scripts/update-version-child.ts && tsx ./scripts/commit-and-tag-release.ts && git push && git push --tags"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.6",
