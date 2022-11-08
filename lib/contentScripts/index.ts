@@ -6,6 +6,7 @@ import browser from "webextension-polyfill"
 
 import type { RequestResponse } from "../background"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
+import { encodeDetail } from "../logic/encoder-detail"
 
 import type { DetailCustomEvent_sendToIndex } from "./inject"
 
@@ -20,7 +21,7 @@ document.addEventListener("http:request", (async ({
 }: CustomEvent<DetailCustomEvent_sendToIndex>) => {
   document.dispatchEvent(
     new CustomEvent<DetailCustomEvent_sendToInject>("http:response", {
-      detail: await (
+      detail: encodeDetail(await (
         sendMessage(
           "http:request",
           detail.req
@@ -50,7 +51,7 @@ document.addEventListener("http:request", (async ({
             ok: false,
             res: err
           }
-        })
+        }))
     })
   )
 }) as unknown as EventListenerOrEventListenerObject)
