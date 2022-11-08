@@ -14,10 +14,17 @@ export interface RequestResponse {
   status: number
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RequestOption = {
+export type RequestOption = Pick<
+  RequestInit,
+  | "method"
+  | "cache"
+  | "integrity"
+  | "keepalive"
+  | "redirect"
+  | "referrerPolicy"
+  | "window"
+> & {
   url: string
-  method?: RequestInit["method"]
   headers?: Record<string, string>
   responseType?: "arraybuffer" | "json" | "text"
   signalId?: string | true
@@ -25,8 +32,8 @@ export type RequestOption = {
 }
 
 const eventsAbort = new (class EventsAbort {
-  // eslint-disable-next-line @typescript-eslint/comma-spacing
-  private readonly store = new Map<string,() => void>()
+  // eslint-disable-next-line func-call-spacing
+  private readonly store = new Map<string, () => void>()
 
   constructor() {
     onMessage<{ signalId: string }>(
@@ -105,8 +112,8 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             // eslint-disable-next-line operator-linebreak
-            ? // eslint-disable-next-line promise/no-nesting
-            await res.arrayBuffer().then(arrayBufferToBase64)
+            ? // eslint-disable-next-line promise/no-nesting, indent
+              await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status
