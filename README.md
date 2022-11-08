@@ -18,32 +18,8 @@ Although this extension is called `AnimeVsub Helper` it can provide complete API
 </a>
 
 ## Inject window.Http
-Here is the API that this extension embeds in websites:
-```ts
-interface GetOptions {
-  url: string
-  headers?: Record<string, string>
-  responseType?: "arraybuffer"
-}
-interface PostOptions {
-  url: string
-  headers?: Record<string, string>
-  responseType?: "arraybuffer"
-  data?: Record<string, string>
-}
-
-interface HttpResponse {
-  headers: Record<string, string>
-  data: ArrayBuffer | string
-  url: string
-  status: number
-}
-
-interface Http {
-  get: (options: GetOptions) => Promise<HttpResponse>
-  post: (options: PostOptions) => Promise<HttpResponse>
-}
-```
+Here is the API that this extension embeds in websites
+[Check here](./lib/contentScripts/inject.ts)
 
 Use them by calling `window.Http.get` or `window.Http.post` in your website
 

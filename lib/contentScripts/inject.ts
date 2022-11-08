@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
 import { version } from "../../package.json"
-import type { RequestOption } from "../background"
+import type { RequestOption, RequestResponse } from "../background"
 import { randomUUID } from "../logic/randomUUID"
 
 import type { DetailCustomEvent_sendToInject } from "."
@@ -18,7 +18,7 @@ function createPorter(method: string, options: ClientRequestOption) {
     ...options,
     method
   }
-  return new Promise((resolve, reject) => {
+  return new Promise<RequestResponse>((resolve, reject) => {
     const id = randomUUID()
     const handler = (({
       detail
@@ -58,14 +58,21 @@ function createPorter(method: string, options: ClientRequestOption) {
   })
 }
 
-export type BaseOption = Omit<ClientRequestOption, "method" | "data">
+type BaseOption = Omit<ClientRequestOption, "method" | "data">
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface GetOption extends BaseOption {}
+interface PostOption extends BaseOption {
+  data?: RequestOption["data"]
+}
+
+export interface Http {
+  version: string
+  get: (options: GetOption) => Promise<RequestResponse>
+  post: (options: PostOption) => Promise<RequestResponse>
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/immutable-data
-;(window as any).Http = {
-  get: (options: BaseOption) => createPorter("get", options),
-  post: (
-    options: BaseOption & {
-      data?: RequestOption["data"]
-    }
-  ) => createPorter("post", options),
+;(window as any).Http = <Http>{
+  get: (options) => createPorter("get", options),
+  post: (options) => createPorter("post", options),
   version
 }

@@ -44,6 +44,7 @@ importers:
       '@types/cookie': ^0.5.1
       cookie: ^0.5.0
       js-base64: ^3.7.2
+      tsup: ^5.12.9
       vitest: ^0.24.5
       web-ext: ^7.2.0
       webext-bridge: 6.0.0-rc3
@@ -54,6 +55,7 @@ importers:
       js-base64: 3.7.2
     devDependencies:
       '@types/cookie': 0.5.1
+      tsup: 5.12.9
       vitest: 0.24.5
       web-ext: 7.3.1
       webext-bridge: 6.0.0-rc3

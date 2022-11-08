@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build:dts": "tsup ./contentScripts/inject.ts --dts-only --clean",
     "test": "vitest --run",
     "test:watch": "vitest"
   },
@@ -10,6 +11,7 @@
   },
   "devDependencies": {
     "@types/cookie": "^0.5.1",
+    "tsup": "^5.12.9",
     "vitest": "^0.24.5",
     "web-ext": "^7.2.0",
     "webext-bridge": "6.0.0-rc3",
