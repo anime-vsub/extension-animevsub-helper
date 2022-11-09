@@ -4,6 +4,7 @@ import { version } from "../../package.json"
 import type { RequestOption, RequestResponse } from "../background"
 import { decodeDetail } from "../logic/encoder-detail"
 import { randomUUID } from "../logic/randomUUID"
+import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 
 import type { DetailCustomEvent_sendToInject } from "."
 
@@ -26,7 +27,12 @@ function createPorter(method: string, options: ClientRequestOption) {
     }: CustomEvent<DetailCustomEvent_sendToInject>) => {
       detail = decodeDetail(detail)
       if (detail.id === id) {
-        if (detail.ok) resolve(detail.res)
+        if (detail.ok) {
+          if (detail.isBuffer) {
+            detail.res.data = base64ToArrayBuffer(detail.res.data)
+          }
+          resolve(detail.res)
+        }
         else reject(detail.res)
         document.removeEventListener("http:response", handler)
       }

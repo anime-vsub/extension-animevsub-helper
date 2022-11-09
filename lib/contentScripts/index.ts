@@ -7,11 +7,13 @@ import browser from "webextension-polyfill"
 import type { RequestResponse } from "../background"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { encodeDetail } from "../logic/encoder-detail"
+import { isFirefox } from "../env"
 
 import type { DetailCustomEvent_sendToIndex } from "./inject"
 
 export interface DetailCustomEvent_sendToInject {
   id: string
+  isBuffer?: boolean
   ok: boolean
   res: RequestResponse
 }
@@ -32,7 +34,7 @@ document.addEventListener("http:request", (async ({
             switch (detail.req.responseType) {
               case "arraybuffer":
                 // eslint-disable-next-line functional/immutable-data
-                res.data = base64ToArrayBuffer(res.data as string)
+                res.data = isFirefox ? res.data as string : base64ToArrayBuffer(res.data as string)
                 break
               case "json":
                 // eslint-disable-next-line functional/immutable-data
@@ -42,6 +44,7 @@ document.addEventListener("http:request", (async ({
 
             return {
               id: detail.id,
+              isBuffer: isFirefox && detail.req.responseType === "arraybuffer",
               ok: true,
               res
             }
