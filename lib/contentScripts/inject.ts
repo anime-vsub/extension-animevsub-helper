@@ -2,9 +2,9 @@
 /* eslint-disable no-undef */
 import { version } from "../../package.json"
 import type { RequestOption, RequestResponse } from "../background"
+import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { decodeDetail } from "../logic/encoder-detail"
 import { randomUUID } from "../logic/randomUUID"
-import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 
 import type { DetailCustomEvent_sendToInject } from "."
 
@@ -28,12 +28,12 @@ function createPorter(method: string, options: ClientRequestOption) {
       detail = decodeDetail(detail)
       if (detail.id === id) {
         if (detail.ok) {
-          if (detail.isBuffer) {
-            detail.res.data = base64ToArrayBuffer(detail.res.data)
-          }
+          if (detail.isBuffer)
+            // eslint-disable-next-line functional/immutable-data
+            detail.res.data = base64ToArrayBuffer(detail.res.data as string)
+
           resolve(detail.res)
-        }
-        else reject(detail.res)
+        } else { reject(detail.res) }
         document.removeEventListener("http:response", handler)
       }
     }) as EventListenerOrEventListenerObject

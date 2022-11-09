@@ -5,9 +5,9 @@ import { sendMessage } from "@tachibana-shin/webext-bridge/content-script"
 import browser from "webextension-polyfill"
 
 import type { RequestResponse } from "../background"
+import { isFirefox } from "../env"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { encodeDetail } from "../logic/encoder-detail"
-import { isFirefox } from "../env"
 
 import type { DetailCustomEvent_sendToIndex } from "./inject"
 
@@ -34,7 +34,9 @@ document.addEventListener("http:request", (async ({
             switch (detail.req.responseType) {
               case "arraybuffer":
                 // eslint-disable-next-line functional/immutable-data
-                res.data = isFirefox ? res.data as string : base64ToArrayBuffer(res.data as string)
+                res.data = isFirefox
+                  ? (res.data as string)
+                  : base64ToArrayBuffer(res.data as string)
                 break
               case "json":
                 // eslint-disable-next-line functional/immutable-data
