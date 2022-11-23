@@ -14,6 +14,11 @@ Although this extension is called `AnimeVsub Helper` it can provide complete API
 | <a href="https://microsoftedge.microsoft.com/addons/detail/endghpbficnpbadbdalhbpecpgdcojig"><img src="./logos/edge.svg" width="42px" /><br /><span>Edge</span></a> | <a href="https://addons.mozilla.org/vi/firefox/addon/animevsub-helper/"><img src="./logos/firefox.svg" width="42px" /><br /><span>Firefox</span></a> | <a href="https://addons.mozilla.org/vi/android/addon/animevsub-helper/"><img src="./logos/firefox.svg" width="42px" /><br /><span>Firefox Android</span></a> |
 ---- | ---- | ---- |
 
+### Why can't I see Chrome? Can i use this utility on Chrome?
+- Yes, you can use this utility on Chrome. But I haven't uploaded it to Chrome Store so you need to [install this extension manually](./install-on-chrome.md)
+- The main reason I don't upload this extension to `Chrome Store` is because Google charges `$5` when I want to sign up for an account to upload, and I don't want to
+- If someone wants to upload this utility to the `Chrome Store` just do so you don't have to get permission from anyone. But then send a pull request that includes a link to the utility and your name to this repo to share it with everyone.
+
 ## Inject window.Http
 Here is the API that this extension embeds in websites
 [Check here](./lib/contentScripts/inject.ts)
