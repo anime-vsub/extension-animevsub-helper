@@ -6,6 +6,8 @@ import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { decodeDetail } from "../logic/encoder-detail"
 import { randomUUID } from "../logic/randomUUID"
 
+import allowlist from "../../allowlist.yaml"
+
 import type { DetailCustomEvent_sendToInject } from "."
 
 export interface ClientRequestOption extends Omit<RequestOption, "signalId"> {
@@ -33,7 +35,9 @@ function createPorter(method: string, options: ClientRequestOption) {
             detail.res.data = base64ToArrayBuffer(detail.res.data as string)
 
           resolve(detail.res)
-        } else { reject(detail.res) }
+        } else {
+          reject(detail.res)
+        }
         document.removeEventListener("http:response", handler)
       }
     }) as EventListenerOrEventListenerObject
@@ -66,6 +70,20 @@ function createPorter(method: string, options: ClientRequestOption) {
   })
 }
 
+function createNotAllow(method: string) {
+  return async (options) => {
+    if (await getAllowed()) return createPorter(method, options)
+    return Promise.reject(
+      Object.assign(
+        new Error("Your domain is not permission to access the Http API"),
+        {
+          code: "NOT_ALLOW_PREMISSION"
+        }
+      )
+    )
+  }
+}
+
 type BaseOption = Omit<ClientRequestOption, "method" | "data">
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface GetOption extends BaseOption {}
@@ -75,12 +93,65 @@ interface PostOption extends BaseOption {
 
 export interface Http {
   version: string
+  allowlist: { hosts: string[] }
   get: (options: GetOption) => Promise<RequestResponse>
   post: (options: PostOption) => Promise<RequestResponse>
 }
+
+const allowedRoot = allowlist.hosts.some((host) => {
+  // checker
+  host = new URL(host.includes("://") ? host : `http://${host}`)
+
+  if (host.hostname !== location.hostname) return false
+  if (host.protocol.endsWith("s:") && !location.protocol.endsWith("s:"))
+    return false
+
+  return location.pathname.startsWith(host.pathname)
+})
+
+let _allowed
+const getAllowed = () => {
+  if (_allowed) return _allowed
+  return (_allowed = new Promise<boolean>(async (resolve, reject) => {
+    if (allowedRoot) return resolve(true)
+
+    // check with API
+    try {
+      const res = await fetch(
+        `https://raw.githubusercontent.com/anime-vsub/extension-animevsub-helper/allowlist/${location.hostname}`
+      )
+
+      if (!res.ok) {
+        resolve(false)
+        return
+      }
+
+      const { allow, pathname } = await res.json()
+
+      resolve(allow && location.pathname.startsWith(pathname))
+    } catch {
+      reject(
+        Object.assign(
+          new Error("Could not validate access to this site's API"),
+          {
+            code: "NOT_VALIDATE_PERMISSION"
+          }
+        )
+      )
+    }
+  }))
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/immutable-data
 ;(window as any).Http = <Http>{
-  get: (options) => createPorter("get", options),
-  post: (options) => createPorter("post", options),
-  version
+  get: allowedRoot
+    ? (options) => createPorter("get", options)
+    : createNotAllow("get"),
+  post: allowedRoot
+    ? (options) => createPorter("post", options)
+    : createNotAllow("post"),
+  version,
+  allowedRoot,
+  getAllowed,
+  allowlist: JSON.parse(JSON.stringify(allowlist))
 }

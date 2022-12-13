@@ -16,7 +16,8 @@
     "noUnusedLocals": true,
     "forceConsistentCasingInFileNames": true,
     "types": [
-      "vite/client"
+      "vite/client",
+      "@modyfi/vite-plugin-yaml/modules"
     ]
   },
   "exclude": [

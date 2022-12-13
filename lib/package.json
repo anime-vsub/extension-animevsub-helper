@@ -10,6 +10,7 @@
     "js-base64": "^3.7.2"
   },
   "devDependencies": {
+    "@modyfi/vite-plugin-yaml": "^1.0.3",
     "@types/cookie": "^0.5.1",
     "tsup": "^5.12.9",
     "vitest": "^0.24.5",

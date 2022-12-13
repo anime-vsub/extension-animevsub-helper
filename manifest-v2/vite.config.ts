@@ -4,6 +4,7 @@ import { dirname, relative } from "path"
 
 import type { UserConfig } from "vite"
 import { defineConfig } from "vite"
+import yaml from "@modyfi/vite-plugin-yaml"
 
 import { isDev, port, r } from "./scripts/utils"
 
@@ -19,6 +20,7 @@ export const sharedConfig: UserConfig = {
     __DEV__: isDev
   },
   plugins: [
+    yaml(),
     // rewrite assets to use relative path
     {
       name: "assets-rewrite",

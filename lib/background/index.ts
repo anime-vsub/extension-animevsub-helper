@@ -111,9 +111,8 @@ async function sendRequest({
         ),
         data:
           responseType === "arraybuffer"
-            // eslint-disable-next-line operator-linebreak
-            ?
-          // eslint-disable-next-line promise/no-nesting, indent
+            ? // eslint-disable-next-line operator-linebreak
+              // eslint-disable-next-line promise/no-nesting, indent
               await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
