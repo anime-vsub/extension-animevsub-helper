@@ -3,3 +3,4 @@ hosts:
   - animevsub.netlify.app
   - tariteam.github.io/download-video # beta code
   - example.com
+  - localhost
