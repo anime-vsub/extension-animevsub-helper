@@ -1,4 +1,4 @@
-# Install extension for Chromium (Chrome, Opera, Brave, Firefox...)
+# Install extension for Chromium (Chrome, Opera, Brave, Avas...)
 
 > If you are using Firefox or Edge this add-on is available in respective stores. [README](./README.md)
 
