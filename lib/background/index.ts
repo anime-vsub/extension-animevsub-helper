@@ -5,6 +5,69 @@ import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
+import { randomUUID } from "../logic/randomUUID"
+
+const hash = randomUUID()
+let listenBeforeSendHeaders: (details: browser.WebRequest.OnBeforeSendHeadersDetailsType) => void | browser.WebRequest.BlockingResponseOrPromise
+
+let runnedOverwriteReferer = false
+
+async function uninstallOverwriteReferer() {
+  if (typeof chrome !== "undefined" && chrome.declarativeNetRequest)
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: (await chrome.declarativeNetRequest.getDynamicRules()).map(item => item.id)
+    })
+  else
+    listenBeforeSendHeaders && await browser.webRequest.onBeforeSendHeaders.removeListener(listenBeforeSendHeaders)
+}
+/** @description this paragraph modifies the title of anything that has the #vsub tag, it looks powerful in the middle */
+async function initOverwriteReferer() {
+  if (runnedOverwriteReferer) return
+  runnedOverwriteReferer = true
+
+  await uninstallOverwriteReferer()
+
+  const urlFilterV3 = `#animevsub-vsub_${hash}|`
+  const urlFilterV2 = `*#animevsub-vsub_${hash}`
+  const referer = "https://animevietsub.tv/"
+
+  if (typeof chrome !== "undefined" && chrome.declarativeNetRequest)
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: [{
+        "id": 1,
+        "priority": 1,
+        "action": {
+          "type": chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+          "requestHeaders": [
+            { "header": "Referer", "operation": chrome.declarativeNetRequest.HeaderOperation.SET, "value": referer }
+          ]
+        },
+        "condition": {
+          "urlFilter": urlFilterV3,
+          "resourceTypes": [chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+        }
+      }],
+    })
+  else
+    await browser.webRequest.onBeforeSendHeaders.addListener(listenBeforeSendHeaders = (details) => {
+      const refererCurrent = details.requestHeaders?.find(item => item.name.toLowerCase() === "referer")
+
+      if (refererCurrent)
+        refererCurrent.value = referer
+      else {
+        if (!details.requestHeaders) details.requestHeaders = []
+        details.requestHeaders.push({ name: "Referer", value: referer });
+      }
+
+      return { requestHeaders: details.requestHeaders };
+    }, {
+      urls: [urlFilterV2]
+    }, [
+      "requestHeaders",
+      "blocking",
+      "extraHeaders"
+    ]);
+}
 
 export interface RequestResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,6 +155,10 @@ async function sendRequest({
     }
   }
 
+  await initOverwriteReferer()
+
+  if (url.endsWith("#animevsub-vsub")) url += "_" + hash
+
   return fetch(url, {
     headers: new Headers(headers),
     credentials: "include",
@@ -112,8 +179,8 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             ? // eslint-disable-next-line operator-linebreak
-              // eslint-disable-next-line promise/no-nesting, indent
-              await res.arrayBuffer().then(arrayBufferToBase64)
+            // eslint-disable-next-line promise/no-nesting, indent
+            await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status

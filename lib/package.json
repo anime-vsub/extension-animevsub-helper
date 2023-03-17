@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@modyfi/vite-plugin-yaml": "^1.0.3",
+    "@types/chrome": "^0.0.224",
     "@types/cookie": "^0.5.1",
     "tsup": "^5.12.9",
     "vitest": "^0.24.5",

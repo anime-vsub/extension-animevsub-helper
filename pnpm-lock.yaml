@@ -42,6 +42,7 @@ importers:
     specifiers:
       '@modyfi/vite-plugin-yaml': ^1.0.3
       '@tachibana-shin/webext-bridge': 6.0.0-rc3
+      '@types/chrome': ^0.0.224
       '@types/cookie': ^0.5.1
       cookie: ^0.5.0
       js-base64: ^3.7.2
@@ -56,6 +57,7 @@ importers:
       js-base64: 3.7.2
     devDependencies:
       '@modyfi/vite-plugin-yaml': 1.0.3
+      '@types/chrome': 0.0.224
       '@types/cookie': 0.5.1
       tsup: 5.12.9
       vitest: 0.24.5
@@ -416,8 +418,29 @@ packages:
     resolution: {integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==}
     dev: true
 
+  /@types/chrome/0.0.224:
+    resolution: {integrity: sha512-YkL7q3KDV7OAKgVCBNIfH73rnjNMbIzAYHzTa2DKhSK/2z0Wf/n8yJnK/UoW+lvuYJJR4LtAkG3YvsIZTy7BOA==}
+    dependencies:
+      '@types/filesystem': 0.0.32
+      '@types/har-format': 1.2.10
+    dev: true
+
   /@types/cookie/0.5.1:
     resolution: {integrity: sha512-COUnqfB2+ckwXXSFInsFdOAWQzCCx+a5hq2ruyj+Vjund94RJQd4LG2u9hnvJrTgunKAaax7ancBYlDrNYxA0g==}
+    dev: true
+
+  /@types/filesystem/0.0.32:
+    resolution: {integrity: sha512-Yuf4jR5YYMR2DVgwuCiP11s0xuVRyPKmz8vo6HBY3CGdeMj8af93CFZX+T82+VD1+UqHOxTq31lO7MI7lepBtQ==}
+    dependencies:
+      '@types/filewriter': 0.0.29
+    dev: true
+
+  /@types/filewriter/0.0.29:
+    resolution: {integrity: sha512-BsPXH/irW0ht0Ji6iw/jJaK8Lj3FJemon2gvEqHKpCdDCeemHa+rI3WBGq5z7cDMZgoLjY40oninGxqk+8NzNQ==}
+    dev: true
+
+  /@types/har-format/1.2.10:
+    resolution: {integrity: sha512-o0J30wqycjF5miWDKYKKzzOU1ZTLuA42HZ4HE7/zqTOc/jTLdQ5NhYWvsRQo45Nfi1KHoRdNhteSI4BAxTF1Pg==}
     dev: true
 
   /@types/http-cache-semantics/4.0.1:
