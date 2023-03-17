@@ -1,7 +1,13 @@
 export const randomUUID =
-  (typeof crypto !== "undefined"
-    ? // eslint-disable-next-line operator-linebreak
-      // eslint-disable-next-line no-undef
-      crypto.randomUUID?.bind(crypto)
-    : undefined) ??
-  (() => (+Math.random().toString().replace(".", "")).toString(34))
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID.bind(crypto)
+    : () => {
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+        /[xy]/g,
+        function (c) {
+          const r = (Math.random() * 16) | 0
+          const v = c === "x" ? r : (r & 0x3) | 0x8
+          return v.toString(16)
+        }
+      )
+    }
