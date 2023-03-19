@@ -28,7 +28,7 @@ async function initOverwriteReferer() {
   await uninstallOverwriteReferer()
 
   const urlFilterV3 = `#animevsub-vsub_${hash}|`
-  const urlFilterV2 = `*#animevsub-vsub_${hash}`
+  const urlFilterV2 = `#animevsub-vsub_${hash}`
   const referer = "https://animevietsub.tv/"
 
   if (typeof chrome !== "undefined" && chrome.declarativeNetRequest)
@@ -50,6 +50,7 @@ async function initOverwriteReferer() {
     })
   else
     await browser.webRequest.onBeforeSendHeaders.addListener(listenBeforeSendHeaders = (details) => {
+	  if (!details.url.endsWith(urlFilterV2)) return
       const refererCurrent = details.requestHeaders?.find(item => item.name.toLowerCase() === "referer")
 
       if (refererCurrent)
@@ -61,11 +62,11 @@ async function initOverwriteReferer() {
 
       return { requestHeaders: details.requestHeaders };
     }, {
-      urls: [urlFilterV2]
+      urls: ["<all_urls>"]
     }, [
       "requestHeaders",
       "blocking",
-      "extraHeaders"
+      // "extraHeaders"
     ]);
 }
 
