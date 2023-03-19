@@ -23,7 +23,7 @@ export async function getManifest() {
       48: "./assets/icon-512.png",
       128: "./assets/icon-512.png"
     },
-    permissions: ["activeTab", "http://*/", "https://*/", "cookies", "webRequest"],
+    permissions: ["activeTab", "http://*/", "https://*/", "cookies", "webRequest", "webRequestBlocking"],
     content_scripts: [
       {
         matches: ["http://*/*", "https://*/*"],
