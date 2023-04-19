@@ -5,9 +5,8 @@ import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
-import { randomUUID } from "../logic/randomUUID"
 
-const hash = randomUUID()
+
 let listenBeforeSendHeaders: (details: browser.WebRequest.OnBeforeSendHeadersDetailsType) => void | browser.WebRequest.BlockingResponseOrPromise
 
 let runnedOverwriteReferer = false
@@ -27,8 +26,8 @@ async function initOverwriteReferer() {
 
   await uninstallOverwriteReferer()
 
-  const urlFilterV3 = `#animevsub-vsub_${hash}|`
-  const urlFilterV2 = `#animevsub-vsub_${hash}`
+  const urlFilterV3 = `#animevsub-vsub|`
+  const urlFilterV2 = `#animevsub-vsub`
   const referer = "https://animevietsub.tv/"
 
   if (typeof chrome !== "undefined" && chrome.declarativeNetRequest)
@@ -157,8 +156,6 @@ async function sendRequest({
   }
 
   await initOverwriteReferer()
-
-  if (url.endsWith("#animevsub-vsub")) url += "_" + hash
 
   return fetch(url, {
     headers: new Headers(headers),
