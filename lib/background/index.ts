@@ -6,6 +6,12 @@ import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 
+const mapDeclareReferrer = {
+  "#animevsub-vsub": "https://animevietsub.tv/",
+  "#vuighe": "https://vuighe.net/"
+} as const
+const hashesDeclareReferrer = Object.keys(mapDeclareReferrer) as (keyof typeof mapDeclareReferrer)[]
+
 // eslint-disable-next-line functional/no-let
 let listenBeforeSendHeaders: (
   details: browser.WebRequest.OnBeforeSendHeadersDetailsType
@@ -35,48 +41,48 @@ async function initOverwriteReferer() {
 
   await uninstallOverwriteReferer()
 
-  const urlFilterV3 = "#animevsub-vsub|"
-  const urlFilterV2 = "#animevsub-vsub"
-  const referer = "https://animevietsub.tv/"
-
   if (typeof chrome !== "undefined" && chrome.declarativeNetRequest) {
     await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: [
-        {
-          id: 1,
-          priority: 1,
-          action: {
-            type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-            requestHeaders: [
-              {
-                header: "Referer",
-                operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                value: referer
-              }
-            ]
-          },
-          condition: {
-            urlFilter: urlFilterV3,
-            resourceTypes: [
-              chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST
-            ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+      addRules: Object.entries(mapDeclareReferrer).map(
+        ([endsWith, referer], id) => {
+          return {
+            id: id + 1,
+            priority: 1,
+            action: {
+              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+              requestHeaders: [
+                {
+                  header: "Referer",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: referer
+                }
+              ]
+            },
+            condition: {
+              urlFilter: endsWith + "|",
+              resourceTypes: [
+                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST
+              ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+            }
           }
         }
-      ]
+      )
     })
   } else {
     await browser.webRequest.onBeforeSendHeaders.addListener(
       (listenBeforeSendHeaders = (details) => {
-        if (!details.url.endsWith(urlFilterV2)) return
+        const hash = hashesDeclareReferrer.find(item => details.url.endsWith(item))
+
+        if (!hash) return
         const refererCurrent = details.requestHeaders?.find(
           (item) => item.name.toLowerCase() === "referer"
         )
 
         if (refererCurrent) {
-          refererCurrent.value = referer
+          refererCurrent.value = mapDeclareReferrer[hash]
         } else {
           if (!details.requestHeaders) details.requestHeaders = []
-          details.requestHeaders.push({ name: "Referer", value: referer })
+          details.requestHeaders.push({ name: "Referer", value: mapDeclareReferrer[hash] })
         }
 
         return { requestHeaders: details.requestHeaders }
@@ -202,7 +208,8 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             // eslint-disable-next-line operator-linebreak
-            ? // eslint-disable-next-line promise/no-nesting, indent
+            ?
+          // eslint-disable-next-line promise/no-nesting, indent
               await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
