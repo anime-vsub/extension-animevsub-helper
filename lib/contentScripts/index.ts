@@ -33,13 +33,11 @@ document.addEventListener("http:request", (async ({
           .then((res): DetailCustomEvent_sendToInject => {
             switch (detail.req.responseType) {
               case "arraybuffer":
-                // eslint-disable-next-line functional/immutable-data
                 res.data = isFirefox
                   ? (res.data as string)
                   : base64ToArrayBuffer(res.data as string)
                 break
               case "json":
-                // eslint-disable-next-line functional/immutable-data
                 res.data = JSON.parse(res.data as string)
                 break
             }
@@ -67,12 +65,23 @@ document.addEventListener("http:aborted", (({
 }: CustomEvent<{ signalId: string }>) => {
   sendMessage("http:aborted", { signalId })
 }) as unknown as EventListenerOrEventListenerObject)
+
+document.addEventListener("get:HASH", (async (event: CustomEvent<string>) => {
+  document.dispatchEvent(
+    new CustomEvent<{ id: string; hash: string }>("res:HASH", {
+      detail: {
+        id: event.detail,
+        hash: await sendMessage<string>("get:HASH", null)
+      }
+    })
+  )
+}) as unknown as EventListenerOrEventListenerObject)
 ;(() => {
   console.log("start inject")
   const s = document.createElement("script")
-  // eslint-disable-next-line functional/immutable-data
+
   s.src = browser.runtime.getURL("dist/contentScripts/inject.global.js")
-  // eslint-disable-next-line functional/immutable-data
+
   s.onload = () => s.remove()
   ;(document.head || document.documentElement).prepend(s)
   // where id === uuid then found

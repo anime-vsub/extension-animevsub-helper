@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 /* eslint-disable no-undef */
 
 import { onMessage } from "@tachibana-shin/webext-bridge/background"
@@ -5,47 +6,42 @@ import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
+import { randomUUID } from "../logic/randomUUID"
+
+const HASH = randomUUID()
 
 const mapDeclareReferrer = {
   "#animevsub-vsub": "https://animevietsub.tv/",
   "#vuighe": "https://vuighe.net/"
 } as const
-const hashesDeclareReferrer = Object.keys(mapDeclareReferrer) as (keyof typeof mapDeclareReferrer)[]
-
-// eslint-disable-next-line functional/no-let
-let listenBeforeSendHeaders: (
-  details: browser.WebRequest.OnBeforeSendHeadersDetailsType
-) => void | browser.WebRequest.BlockingResponseOrPromise
+const countDeclares = Object.keys(mapDeclareReferrer).length
+const hashesDeclareReferrer = Object.keys(
+  mapDeclareReferrer
+) as (keyof typeof mapDeclareReferrer)[]
 
 // eslint-disable-next-line functional/no-let
 let runnedOverwriteReferer = false
 
-async function uninstallOverwriteReferer() {
+const uninstallerOverwrite = initOverwriteReferer()
+/** @description this paragraph modifies the title of anything that has the #vsub tag, it looks powerful in the middle */
+async function initOverwriteReferer() {
+  if (runnedOverwriteReferer) return
+  runnedOverwriteReferer = true
+  ;(await uninstallerOverwrite)?.()
+
   if (typeof chrome !== "undefined" && chrome.declarativeNetRequest) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: (
         await chrome.declarativeNetRequest.getDynamicRules()
       ).map((item) => item.id)
     })
-  } else {
-    listenBeforeSendHeaders &&
-      (await browser.webRequest.onBeforeSendHeaders.removeListener(
-        listenBeforeSendHeaders
-      ))
-  }
-}
-/** @description this paragraph modifies the title of anything that has the #vsub tag, it looks powerful in the middle */
-async function initOverwriteReferer() {
-  if (runnedOverwriteReferer) return
-  runnedOverwriteReferer = true
 
-  await uninstallOverwriteReferer()
-
-  if (typeof chrome !== "undefined" && chrome.declarativeNetRequest) {
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: Object.entries(mapDeclareReferrer).map(
-        ([endsWith, referer], id) => {
-          return {
+    const rules: chrome.declarativeNetRequest.Rule[] = Object.entries(
+      mapDeclareReferrer
+    )
+      .map(([endsWith, referer], id) => {
+        const rules: chrome.declarativeNetRequest.Rule[] = [
+          {
             id: id + 1,
             priority: 1,
             action: {
@@ -64,29 +60,161 @@ async function initOverwriteReferer() {
                 chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST
               ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
             }
+          },
+          {
+            id: id + countDeclares + 1,
+            priority: 1,
+            action: {
+              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+              requestHeaders: [
+                {
+                  header: "Referer",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: referer
+                }
+              ],
+              responseHeaders: [
+                {
+                  header: "Access-Control-Allow-Origin",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: "*"
+                },
+                {
+                  header: "Access-Control-Allow-Methods",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+                }
+              ]
+            },
+            condition: {
+              urlFilter: endsWith + HASH + "|",
+              resourceTypes: [
+                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+                chrome.declarativeNetRequest.ResourceType.IMAGE,
+                chrome.declarativeNetRequest.ResourceType.MEDIA
+              ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+            }
           }
-        }
-      )
+        ]
+
+        return rules
+      })
+      .flat(1)
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: rules
     })
+
+    const ruleIds = rules.map((item) => item.id)
+
+    return () =>
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: ruleIds
+      })
   } else {
-    await browser.webRequest.onBeforeSendHeaders.addListener(
-      (listenBeforeSendHeaders = (details) => {
-        const hash = hashesDeclareReferrer.find(item => details.url.endsWith(item))
+    const listenerBeforeSendHeadersOld = (
+      details: browser.WebRequest.OnBeforeSendHeadersDetailsType
+    ): browser.WebRequest.BlockingResponseOrPromise | void => {
+      const hash = hashesDeclareReferrer.find((item) =>
+        details.url.endsWith(item)
+      )
 
-        if (!hash) return
-        const refererCurrent = details.requestHeaders?.find(
-          (item) => item.name.toLowerCase() === "referer"
-        )
+      if (!hash) return
+      const refererCurrent = details.requestHeaders?.find(
+        (item) => item.name.toLowerCase() === "referer"
+      )
 
-        if (refererCurrent) {
-          refererCurrent.value = mapDeclareReferrer[hash]
-        } else {
-          if (!details.requestHeaders) details.requestHeaders = []
-          details.requestHeaders.push({ name: "Referer", value: mapDeclareReferrer[hash] })
-        }
+      if (refererCurrent) {
+        refererCurrent.value = mapDeclareReferrer[hash]
+      } else {
+        if (!details.requestHeaders) details.requestHeaders = []
+        details.requestHeaders.push({
+          name: "Referer",
+          value: mapDeclareReferrer[hash]
+        })
+      }
 
-        return { requestHeaders: details.requestHeaders }
-      }),
+      return { requestHeaders: details.requestHeaders }
+    }
+
+    // new API
+    const listenerBeforeSendHeaders = (
+      details: browser.WebRequest.OnBeforeSendHeadersDetailsType
+    ): browser.WebRequest.BlockingResponseOrPromise | void => {
+      const hash = hashesDeclareReferrer.find((item) =>
+        details.url.endsWith(item + HASH)
+      )
+
+      if (!hash) return
+      const refererCurrent = details.requestHeaders?.find(
+        (item) => item.name.toLowerCase() === "referer"
+      )
+
+      if (refererCurrent) {
+        refererCurrent.value = mapDeclareReferrer[hash]
+      } else {
+        if (!details.requestHeaders) details.requestHeaders = []
+        details.requestHeaders.push({
+          name: "Referer",
+          value: mapDeclareReferrer[hash]
+        })
+      }
+
+      return { requestHeaders: details.requestHeaders }
+    }
+    const listenerHeadersReceived = (
+      details: browser.WebRequest.OnHeadersReceivedDetailsType
+    ): browser.WebRequest.BlockingResponseOrPromise | void => {
+      const hash = hashesDeclareReferrer.find((item) =>
+        details.url.endsWith(item + HASH)
+      )
+
+      if (!hash) return
+      // eslint-disable-next-line functional/no-let
+      let accessControlAllowOriginCurrent:
+          | browser.WebRequest.HttpHeadersItemType
+          | undefined,
+        accessControlAllowMethodsCurrent:
+          | browser.WebRequest.HttpHeadersItemType
+          | undefined
+
+      if (details.responseHeaders) {
+        details.responseHeaders.forEach((item) => {
+          if (item.name.toLowerCase() === "access-control-allow-origin") {
+            accessControlAllowOriginCurrent = item
+            return
+          }
+          if (item.name.toLowerCase() === "access-control-allow-methods")
+            accessControlAllowMethodsCurrent = item
+        })
+      } else {
+        details.responseHeaders = []
+      }
+
+      if (accessControlAllowOriginCurrent) {
+        accessControlAllowOriginCurrent.value = "*"
+      } else {
+        details.responseHeaders.push({
+          name: "Access-Control-Allow-Origin",
+          value: "*"
+        })
+      }
+
+      if (accessControlAllowMethodsCurrent) {
+        accessControlAllowMethodsCurrent.value =
+          "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+      } else {
+        details.responseHeaders.push({
+          name: "Access-Control-Allow-Methods",
+          value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+        })
+      }
+
+      // detauls.requesHeaders is exists!
+      return { responseHeaders: details.responseHeaders }
+    }
+
+    browser.webRequest.onBeforeSendHeaders.addListener(
+      listenerBeforeSendHeadersOld,
       {
         urls: ["<all_urls>"]
       },
@@ -96,8 +224,57 @@ async function initOverwriteReferer() {
         // "extraHeaders"
       ]
     )
+    browser.webRequest.onBeforeSendHeaders.addListener(
+      listenerBeforeSendHeaders,
+      {
+        urls: ["<all_urls>"],
+        types: [
+          chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+          chrome.declarativeNetRequest.ResourceType.IMAGE,
+          chrome.declarativeNetRequest.ResourceType.MEDIA
+        ]
+      },
+      [
+        "requestHeaders",
+        "blocking"
+        // "extraHeaders"
+      ]
+    )
+    browser.webRequest.onHeadersReceived.addListener(
+      listenerHeadersReceived,
+      {
+        urls: ["<all_urls>"],
+        types: [
+          chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+          chrome.declarativeNetRequest.ResourceType.IMAGE,
+          chrome.declarativeNetRequest.ResourceType.MEDIA
+        ]
+      },
+      [
+        "responseHeaders",
+        "blocking"
+        // "extraHeaders"
+      ]
+    )
+
+    return () => {
+      browser.webRequest.onBeforeSendHeaders.removeListener(
+        listenerBeforeSendHeadersOld
+      )
+      browser.webRequest.onBeforeSendHeaders.removeListener(
+        listenerBeforeSendHeaders
+      )
+      browser.webRequest.onHeadersReceived.removeListener(
+        listenerHeadersReceived
+      )
+    }
   }
 }
+
+onMessage("get:HASH", async () => {
+  await uninstallerOverwrite
+  return HASH
+})
 
 export interface RequestResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,7 +301,6 @@ export type RequestOption = Pick<
   data?: Record<string, string> | string
 }
 
-// eslint-disable-next-line functional/no-classes
 const eventsAbort = new (class EventsAbort {
   // eslint-disable-next-line func-call-spacing
   private readonly store = new Map<string, () => void>()
@@ -186,7 +362,7 @@ async function sendRequest({
     }
   }
 
-  await initOverwriteReferer()
+  await uninstallerOverwrite
 
   return fetch(url, {
     headers: new Headers(headers),
@@ -199,17 +375,10 @@ async function sendRequest({
       cancelAbort?.()
 
       return {
-        // eslint-disable-next-line n/no-unsupported-features/es-builtins
-        headers: Object.fromEntries(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          (await mergeSetCookie(res.headers, res.url)).entries()
-        ),
+        headers: await mergeSetCookie(res.headers, res.url),
         data:
           responseType === "arraybuffer"
-            // eslint-disable-next-line operator-linebreak
-            ?
-          // eslint-disable-next-line promise/no-nesting, indent
+            ? // eslint-disable-next-line promise/no-nesting, indent
               await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
@@ -218,7 +387,7 @@ async function sendRequest({
     })
     .catch((err) => {
       cancelAbort?.()
-      // eslint-disable-next-line functional/no-throw-statements
+      // eslint-disable-next-line functional/no-throw-statement
       throw err
     })
 }
@@ -229,24 +398,19 @@ onMessage<RequestOption, string>(
 )
 
 async function mergeSetCookie(headers: Headers, url: string) {
-  // not merge;
-  const cookies = await browser.cookies.getAll({ url })
-  headers = new Headers(headers)
-
-  headers.set(
-    "set-cookie",
-    cookies
-      .map((item) => {
-        return serialize(item.name, item.value, {
-          ...item,
-          sameSite: "none",
-          ...(item.expirationDate
-            ? { expires: new Date(Date.now() + item.expirationDate) }
-            : {})
-        })
+  // eslint-disable-next-line n/no-unsupported-features/es-builtins, @typescript-eslint/no-explicit-any
+  const obj = Object.fromEntries((headers as unknown as any).entries())
+  obj["set-cookie"] = (await browser.cookies.getAll({ url }))
+    .map((item) =>
+      serialize(item.name, item.value, {
+        ...item,
+        sameSite: "none",
+        ...(item.expirationDate
+          ? { expires: new Date(Date.now() + item.expirationDate) }
+          : {})
       })
-      .join(",")
-  )
+    )
+    .join(",")
 
-  return headers
+  return obj
 }
