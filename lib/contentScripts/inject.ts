@@ -107,33 +107,6 @@ const allowedRoot = allowlist.hosts.some((url: string) => {
 ;(window as any).Http = <Http>{
   get: allowedRoot ? (options) => createPorter("get", options) : notAllow,
   post: allowedRoot ? (options) => createPorter("post", options) : notAllow,
-  getHash: allowedRoot
-    ? () => {
-        const id = randomUUID()
-
-        return new Promise((resolve) => {
-          const handler = (
-            event: CustomEvent<{ id: string; hash: string }>
-          ) => {
-            if (event.detail.id === id) {
-              document.removeEventListener(
-                "res:HASH",
-                handler as unknown as EventListenerOrEventListenerObject
-              )
-              resolve(event.detail.hash)
-            }
-          }
-
-          document.addEventListener(
-            "res:HASH",
-            handler as unknown as EventListenerOrEventListenerObject
-          )
-          document.dispatchEvent(
-            new CustomEvent<string>("get:HASH", { detail: id })
-          )
-        })
-      }
-    : notAllow,
   version,
   allowedRoot,
   allowlist: JSON.parse(JSON.stringify(allowlist))

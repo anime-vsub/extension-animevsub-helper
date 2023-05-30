@@ -6,9 +6,6 @@ import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
-import { randomUUID } from "../logic/randomUUID"
-
-const HASH = randomUUID()
 
 const mapDeclareReferrer = {
   "#animevsub-vsub": "https://animevietsub.tv/",
@@ -18,6 +15,8 @@ const countDeclares = Object.keys(mapDeclareReferrer).length
 const hashesDeclareReferrer = Object.keys(
   mapDeclareReferrer
 ) as (keyof typeof mapDeclareReferrer)[]
+
+const EXTRA = "_extra"
 
 // eslint-disable-next-line functional/no-let
 let runnedOverwriteReferer = false
@@ -87,7 +86,7 @@ async function initOverwriteReferer() {
               ]
             },
             condition: {
-              urlFilter: endsWith + HASH + "|",
+              urlFilter: endsWith + EXTRA + "|",
               resourceTypes: [
                 chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
                 chrome.declarativeNetRequest.ResourceType.IMAGE,
@@ -141,7 +140,7 @@ async function initOverwriteReferer() {
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
       const hash = hashesDeclareReferrer.find((item) =>
-        details.url.endsWith(item + HASH)
+        details.url.endsWith(item + EXTRA)
       )
 
       if (!hash) return
@@ -165,7 +164,7 @@ async function initOverwriteReferer() {
       details: browser.WebRequest.OnHeadersReceivedDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
       const hash = hashesDeclareReferrer.find((item) =>
-        details.url.endsWith(item + HASH)
+        details.url.endsWith(item + EXTRA)
       )
 
       if (!hash) return
@@ -273,7 +272,7 @@ async function initOverwriteReferer() {
 
 onMessage("get:HASH", async () => {
   await uninstallerOverwrite
-  return HASH
+  return EXTRA
 })
 
 export interface RequestResponse {

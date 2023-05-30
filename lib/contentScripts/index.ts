@@ -66,16 +66,6 @@ document.addEventListener("http:aborted", (({
   sendMessage("http:aborted", { signalId })
 }) as unknown as EventListenerOrEventListenerObject)
 
-document.addEventListener("get:HASH", (async (event: CustomEvent<string>) => {
-  document.dispatchEvent(
-    new CustomEvent<{ id: string; hash: string }>("res:HASH", {
-      detail: {
-        id: event.detail,
-        hash: await sendMessage<string>("get:HASH", null)
-      }
-    })
-  )
-}) as unknown as EventListenerOrEventListenerObject)
 ;(() => {
   console.log("start inject")
   const s = document.createElement("script")
