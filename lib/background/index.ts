@@ -10,9 +10,9 @@ import { modifyHeader } from "../logic/modify-header"
 
 const mapDeclareReferrer = {
   "#animevsub-vsub": "https://animevietsub.tv/",
-  "#vuighe": "https://vuighe.net/"
+  "#vuighe": "https://vuighe.net/",
+  "#star": ""
 } as const
-const countDeclares = Object.keys(mapDeclareReferrer).length
 const hashesDeclareReferrer = Object.keys(
   mapDeclareReferrer
 ) as (keyof typeof mapDeclareReferrer)[]
@@ -46,13 +46,16 @@ async function initOverwriteReferer() {
       ).map((item) => item.id)
     })
 
+    // eslint-disable-next-line functional/no-let
+    let currentId = 1
+
     const rules: chrome.declarativeNetRequest.Rule[] = Object.entries(
       mapDeclareReferrer
     )
-      .map(([endsWith, referer], id) => {
+      .map(([endsWith, referer]) => {
         const rules: chrome.declarativeNetRequest.Rule[] = [
           {
-            id: id + 1,
+            id: currentId++,
             priority: 1,
             action: {
               type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
@@ -72,7 +75,7 @@ async function initOverwriteReferer() {
             }
           },
           {
-            id: id + countDeclares + 1,
+            id: currentId++,
             priority: 1,
             action: {
               type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
@@ -108,15 +111,21 @@ async function initOverwriteReferer() {
         ]
 
         rules.forEach((rule) => {
-          typesUa.forEach((typeUa, i) => {
-            rule.id += countDeclares * (i + 2)
-            rule.action.requestHeaders?.push({
+          typesUa.forEach((typeUa) => {
+            const ruleCloned = JSON.parse(JSON.stringify(rule))
+            ruleCloned.id = currentId++
+            ruleCloned.action.requestHeaders?.push({
               header: "User-Agent",
               operation: chrome.declarativeNetRequest.HeaderOperation.SET,
               value: mapUa[typeUa]
             })
-            rule.condition.urlFilter =
-              rule.condition.urlFilter?.slice(1) + "_ua" + typeUa + "|"
+            ruleCloned.condition.urlFilter =
+              ruleCloned.condition.urlFilter?.slice(0, -1) +
+              "_ua" +
+              typeUa +
+              "|"
+
+            rules.push(ruleCloned)
           })
         })
 
@@ -138,7 +147,9 @@ async function initOverwriteReferer() {
     const listenerBeforeSendHeadersOld = (
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
+      // eslint-disable-next-line functional/no-let
       let ua: keyof typeof mapUa | undefined
+      // eslint-disable-next-line array-callback-return
       const hash = hashesDeclareReferrer.find((item) => {
         if (details.url.endsWith(item)) return true
 
@@ -158,7 +169,9 @@ async function initOverwriteReferer() {
     const listenerBeforeSendHeaders = (
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
+      // eslint-disable-next-line functional/no-let
       let ua: keyof typeof mapUa | undefined
+      // eslint-disable-next-line array-callback-return
       const hash = hashesDeclareReferrer.find((item) => {
         if (details.url.endsWith(item + EXTRA)) return true
 
@@ -178,7 +191,9 @@ async function initOverwriteReferer() {
     const listenerHeadersReceived = (
       details: browser.WebRequest.OnHeadersReceivedDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
+      // eslint-disable-next-line functional/no-let
       let ua: keyof typeof mapUa | undefined
+      // eslint-disable-next-line array-callback-return
       const hash = hashesDeclareReferrer.find((item) => {
         if (details.url.endsWith(item + EXTRA)) return true
 
