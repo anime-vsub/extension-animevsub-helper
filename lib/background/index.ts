@@ -6,6 +6,7 @@ import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
+import { modifyHeader } from "../logic/modify-header"
 
 const mapDeclareReferrer = {
   "#animevsub-vsub": "https://animevietsub.tv/",
@@ -15,6 +16,16 @@ const countDeclares = Object.keys(mapDeclareReferrer).length
 const hashesDeclareReferrer = Object.keys(
   mapDeclareReferrer
 ) as (keyof typeof mapDeclareReferrer)[]
+const mapUa = {
+  firefox:
+    "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
+  chrome:
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+  edge: "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36 Edg/114.0.1823.41",
+  gbot: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+  ybot: "Mozilla/5.0 (compatible; YandexAccessibilityBot/3.0; +http://yandex.com/bots)"
+} as const
+const typesUa = Object.keys(mapUa) as (keyof typeof mapUa)[]
 
 const EXTRA = "_extra"
 
@@ -96,9 +107,23 @@ async function initOverwriteReferer() {
           }
         ]
 
+        rules.forEach((rule) => {
+          typesUa.forEach((typeUa, i) => {
+            rule.id += countDeclares * (i + 2)
+            rule.action.requestHeaders?.push({
+              header: "User-Agent",
+              operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+              value: mapUa[typeUa]
+            })
+            rule.condition.urlFilter =
+              rule.condition.urlFilter?.slice(1) + "_ua" + typeUa + "|"
+          })
+        })
+
         return rules
       })
       .flat(1)
+
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: rules
     })
@@ -113,24 +138,18 @@ async function initOverwriteReferer() {
     const listenerBeforeSendHeadersOld = (
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
-      const hash = hashesDeclareReferrer.find((item) =>
-        details.url.endsWith(item)
-      )
+      let ua: keyof typeof mapUa | undefined
+      const hash = hashesDeclareReferrer.find((item) => {
+        if (details.url.endsWith(item)) return true
+
+        ua = typesUa.find((ua) => details.url.endsWith(item + "_ua" + ua))
+
+        if (ua) return true
+      })
 
       if (!hash) return
-      const refererCurrent = details.requestHeaders?.find(
-        (item) => item.name.toLowerCase() === "referer"
-      )
-
-      if (refererCurrent) {
-        refererCurrent.value = mapDeclareReferrer[hash]
-      } else {
-        if (!details.requestHeaders) details.requestHeaders = []
-        details.requestHeaders.push({
-          name: "Referer",
-          value: mapDeclareReferrer[hash]
-        })
-      }
+      modifyHeader(details, "referer", mapDeclareReferrer[hash])
+      if (ua) modifyHeader(details, "user-agent", ua)
 
       return { requestHeaders: details.requestHeaders }
     }
@@ -139,76 +158,46 @@ async function initOverwriteReferer() {
     const listenerBeforeSendHeaders = (
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
-      const hash = hashesDeclareReferrer.find((item) =>
-        details.url.endsWith(item + EXTRA)
-      )
+      let ua: keyof typeof mapUa | undefined
+      const hash = hashesDeclareReferrer.find((item) => {
+        if (details.url.endsWith(item + EXTRA)) return true
+
+        ua = typesUa.find((ua) =>
+          details.url.endsWith(item + EXTRA + "_ua" + ua)
+        )
+
+        if (ua) return true
+      })
 
       if (!hash) return
-      const refererCurrent = details.requestHeaders?.find(
-        (item) => item.name.toLowerCase() === "referer"
-      )
-
-      if (refererCurrent) {
-        refererCurrent.value = mapDeclareReferrer[hash]
-      } else {
-        if (!details.requestHeaders) details.requestHeaders = []
-        details.requestHeaders.push({
-          name: "Referer",
-          value: mapDeclareReferrer[hash]
-        })
-      }
+      modifyHeader(details, "referer", mapDeclareReferrer[hash])
+      if (ua) modifyHeader(details, "user-agent", ua)
 
       return { requestHeaders: details.requestHeaders }
     }
     const listenerHeadersReceived = (
       details: browser.WebRequest.OnHeadersReceivedDetailsType
     ): browser.WebRequest.BlockingResponseOrPromise | void => {
-      const hash = hashesDeclareReferrer.find((item) =>
-        details.url.endsWith(item + EXTRA)
-      )
+      let ua: keyof typeof mapUa | undefined
+      const hash = hashesDeclareReferrer.find((item) => {
+        if (details.url.endsWith(item + EXTRA)) return true
+
+        ua = typesUa.find((ua) =>
+          details.url.endsWith(item + EXTRA + "_ua" + ua)
+        )
+
+        if (ua) return true
+      })
 
       if (!hash) return
-      // eslint-disable-next-line functional/no-let
-      let accessControlAllowOriginCurrent:
-          | browser.WebRequest.HttpHeadersItemType
-          | undefined,
-        accessControlAllowMethodsCurrent:
-          | browser.WebRequest.HttpHeadersItemType
-          | undefined
+      modifyHeader(details, "access-control-allow-origin", "*")
+      modifyHeader(
+        details,
+        "access-control-allow-methods",
+        "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+      )
+      if (ua) modifyHeader(details, "user-agent", ua)
 
-      if (details.responseHeaders) {
-        details.responseHeaders.forEach((item) => {
-          if (item.name.toLowerCase() === "access-control-allow-origin") {
-            accessControlAllowOriginCurrent = item
-            return
-          }
-          if (item.name.toLowerCase() === "access-control-allow-methods")
-            accessControlAllowMethodsCurrent = item
-        })
-      } else {
-        details.responseHeaders = []
-      }
-
-      if (accessControlAllowOriginCurrent) {
-        accessControlAllowOriginCurrent.value = "*"
-      } else {
-        details.responseHeaders.push({
-          name: "Access-Control-Allow-Origin",
-          value: "*"
-        })
-      }
-
-      if (accessControlAllowMethodsCurrent) {
-        accessControlAllowMethodsCurrent.value =
-          "PUT, GET, HEAD, POST, DELETE, OPTIONS"
-      } else {
-        details.responseHeaders.push({
-          name: "Access-Control-Allow-Methods",
-          value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
-        })
-      }
-
-      // detauls.requesHeaders is exists!
       return { responseHeaders: details.responseHeaders }
     }
 

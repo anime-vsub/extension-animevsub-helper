@@ -65,7 +65,6 @@ document.addEventListener("http:aborted", (({
 }: CustomEvent<{ signalId: string }>) => {
   sendMessage("http:aborted", { signalId })
 }) as unknown as EventListenerOrEventListenerObject)
-
 ;(() => {
   console.log("start inject")
   const s = document.createElement("script")
