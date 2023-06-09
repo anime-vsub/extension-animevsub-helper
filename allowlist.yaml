@@ -3,9 +3,17 @@ hosts:
   - animevsub.netlify.app
   - animevsub.eu.org
   
+  - m.animevsub.netlify.app
+  - m.animevsub.eu.org
+  - m.animevsub.ga
+  - pwa.animevsub.netlify.app
+  - pwa.animevsub.eu.org
+  - pwa.animevsub.ga
+
   - vuitruyen.netlify.app
   - vuitruyen.eu.org
   
   - tariteam.github.io/download-video # beta code
   - example.com
   - localhost
+  - 192.168.0.113
