@@ -28,7 +28,7 @@ jobs:
 
       - name: Pack
         run: |
-          pnpm i
+          pnpm i --no-frozen-lockfile
           pnpm run pack
           
       - name: Generate changelog
