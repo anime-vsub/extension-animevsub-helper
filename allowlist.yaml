@@ -12,6 +12,10 @@ hosts:
 
   - vuitruyen.netlify.app
   - vuitruyen.eu.org
+
+  - mangaraiku.eu.org
+  - m.mangaraiku.eu.org
+  - pwa.mangaraiku.eu.org
   
   - tariteam.github.io/download-video # beta code
   - example.com
