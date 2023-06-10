@@ -32,6 +32,6 @@ export default defineConfig(() => ({
   define: {
     __DEV__: JSON.stringify(isDev)
   },
-  minifyWhitespace: !isDev,
-  minifySyntax: !isDev
+  treeshaking: true,
+  minify: !isDev
 }))
