@@ -8,11 +8,13 @@
     "pack": "pnpm build && pnpm -r run pack",
     "release:mv2": "cd manifest-v2 && pnpm release",
     "release:mv3": "cd manifest-v3 && pnpm release",
-    "release": "tsx ./scripts/update-version-root.ts && bumpp package.json --no-commit --no-tag --no-push && tsx ./scripts/update-version-child.ts && tsx ./scripts/commit-and-tag-release.ts && git push && git push --tags"
+	"npm": "cd npm && pnpm publish",
+    "release": "bumpp package.json manifest-v2/package.json manifest-v3/package.json npm/package.json  --commit --push --tag"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.6",
     "@tachibana-shin/eslint-config": "^1.0.7",
+    "@types/chrome": "^0.0.237",
     "@types/node": "^17.0.35",
     "@types/semver": "^7.3.13",
     "chokidar": "^3.5.3",

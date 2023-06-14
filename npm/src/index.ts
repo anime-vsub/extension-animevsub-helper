@@ -1,13 +1,12 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
-import allowlist from "../../allowlist.yaml"
-import { version } from "../../package.json"
-import type { RequestOption, RequestResponse } from "../background"
-import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
-import { decodeDetail } from "../logic/encoder-detail"
-import { randomUUID } from "../logic/randomUUID"
+import { version as versionClient } from "../../package.json"
+import type { RequestOption, RequestResponse } from "../../lib/background"
+import { base64ToArrayBuffer } from "../../lib/logic/base64ToArrayBuffer"
+import { decodeDetail } from "../../lib/logic/encoder-detail"
+import { randomUUID } from "../../lib/logic/randomUUID"
 
-import type { DetailCustomEvent_sendToInject } from "."
+import type { DetailCustomEvent_sendToInject } from "../../lib/contentScripts"
 
 export interface ClientRequestOption extends Omit<RequestOption, "signalId"> {
   signal?: AbortSignal
@@ -67,6 +66,12 @@ function createPorter(method: string, options: ClientRequestOption) {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface GetOption extends ClientRequestOption {}
+interface PostOption extends ClientRequestOption {
+  data?: RequestOption["data"]
+}
+
 const notAllow = () =>
   Promise.reject(
     Object.assign(
@@ -77,37 +82,21 @@ const notAllow = () =>
     )
   )
 
-type BaseOption = Omit<ClientRequestOption, "method" | "data">
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface GetOption extends BaseOption {}
-interface PostOption extends BaseOption {
-  data?: RequestOption["data"]
-}
-
-export interface Http {
+export interface HttpType {
   version: string
-  allowlist: { hosts: string[] }
+  versionClient: string,
+  allowedRoot: boolean,
   get: (options: GetOption) => Promise<RequestResponse>
   post: (options: PostOption) => Promise<RequestResponse>
 }
 
-const allowedRoot = allowlist.hosts.some((url: string) => {
-  // checker
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins
-  const host = new URL(url.includes("://") ? url : `http://${url}`)
+const allowedRoot = JSON.parse(document.documentElement.dataset.httpAllow ?? "false")
+const version = document.documentElement.dataset.httpVersion
 
-  if (host.hostname !== location.hostname) return false
-  if (host.protocol.endsWith("s:") && !location.protocol.endsWith("s:"))
-    return false
-
-  return location.pathname.startsWith(host.pathname)
-})
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(window as any).Http = <Http>{
-  get: allowedRoot ? (options) => createPorter("get", options) : notAllow,
-  post: allowedRoot ? (options) => createPorter("post", options) : notAllow,
+export const Http = <HttpType>{
+  get:  !allowedRoot ? notAllow : (options) => createPorter("get", options),
+  post: !allowedRoot ? notAllow : (options) => createPorter("post", options),
   version,
+  versionClient,
   allowedRoot,
-  allowlist: JSON.parse(JSON.stringify(allowlist))
 }

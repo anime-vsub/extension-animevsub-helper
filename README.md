@@ -20,10 +20,12 @@ Although this extension is called `AnimeVsub Helper` it can provide complete API
 - If someone wants to upload this utility to the `Chrome Store` just do so you don't have to get permission from anyone. But then send a pull request that includes a link to the utility and your name to this repo to share it with everyone.
 
 ## Inject window.Http
-Here is the API that this extension embeds in websites
-[Check here](./lib/contentScripts/inject.ts)
+> Since stable version `1.0.1` utility will not inject code anymore use npm package [client-ext-animevsub-helper](https://npmjs.org/package/client-ext-animevsub-helper) replaceable
 
-Use them by calling `window.Http.get` or `window.Http.post` in your website
+~~Here is the API that this extension embeds in websites [Check here](./lib/contentScripts/inject.ts)~~
+
+~~Use them by calling `window.Http.get` or `window.Http.post` in your website~~
+
 
 
 ## Development

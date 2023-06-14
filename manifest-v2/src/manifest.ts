@@ -27,13 +27,11 @@ export async function getManifest() {
     content_scripts: [
       {
         matches: ["http://*/*", "https://*/*"],
+		all_frames: true,
+		run_at: "document_start",
         js: ["./dist/contentScripts/index.global.js"]
       }
     ],
-    web_accessible_resources: [
-      "dist/contentScripts/style.css",
-      "dist/contentScripts/inject.global.js"
-    ]
   }
 
   if (isDev) {

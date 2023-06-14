@@ -1,0 +1,48 @@
+{
+  "name": "client-ext-animevsub-helper",
+  "version": "0.0.1",
+  "description": "This package is a client that includes connections to the AnimeVsub Helper utility",
+  "scripts": {
+    "build": "tsup",
+    "dev": "vite dev",
+    "prepublishOnly": "pnpm test && pnpm build",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "devDependencies": {
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.0.3",
+    "vitest": "^0.29.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/anime-vsub/extension-animevsub-helper"
+  },
+  "keywords": [
+	"animevsub-helper"
+  ],
+  "files": [
+    "dist"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "pnpm format"
+    }
+  },
+  "engines": {
+    "node": ">=10"
+  }
+}

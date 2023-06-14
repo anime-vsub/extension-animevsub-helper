@@ -2,3 +2,4 @@ packages:
   - manifest-v2
   - manifest-v3
   - lib
+  - npm
