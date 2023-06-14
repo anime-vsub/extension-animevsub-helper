@@ -1,5 +1,5 @@
 {
-  "version": "0.0.29",
+  "version": "1.0.1",
   "scripts": {
     "lint": "eslint lib/ --ext ts",
     "format": "prettier -w lib/",
@@ -8,7 +8,7 @@
     "pack": "pnpm build && pnpm -r run pack",
     "release:mv2": "cd manifest-v2 && pnpm release",
     "release:mv3": "cd manifest-v3 && pnpm release",
-	"npm": "cd npm && pnpm publish",
+    "npm": "cd npm && pnpm publish",
     "release": "bumpp package.json manifest-v2/package.json manifest-v3/package.json npm/package.json  --commit --push --tag"
   },
   "devDependencies": {
