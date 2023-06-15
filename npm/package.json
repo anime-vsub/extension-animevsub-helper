@@ -1,6 +1,6 @@
 {
   "name": "client-ext-animevsub-helper",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "This package is a client that includes connections to the AnimeVsub Helper utility",
   "scripts": {
     "build": "tsup",
