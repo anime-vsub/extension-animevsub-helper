@@ -37,7 +37,7 @@ const EXTRA = "_extra"
 let runnedOverwriteReferer = false
 
 // eslint-disable-next-line functional/no-let
-let uninstallerOverwrite: Promise<() => void> | undefined
+let uninstallerOverwrite: Promise<(() => void) | undefined> | undefined
 /** @description this paragraph modifies the title of anything that has the #vsub tag, it looks powerful in the middle */
 async function initOverwriteReferer() {
   if (runnedOverwriteReferer) return
