@@ -66,8 +66,8 @@ function createPorter(method: string, options: ClientRequestOption) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface GetOption extends ClientRequestOption {}
-interface PostOption extends ClientRequestOption {
+export interface GetOption extends ClientRequestOption {}
+export interface PostOption extends ClientRequestOption {
   data?: RequestOption["data"]
 }
 
