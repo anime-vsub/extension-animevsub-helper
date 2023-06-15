@@ -1,12 +1,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
-import { version as versionClient } from "../../package.json"
 import type { RequestOption, RequestResponse } from "../../lib/background"
+import type { DetailCustomEvent_sendToInject } from "../../lib/contentScripts"
 import { base64ToArrayBuffer } from "../../lib/logic/base64ToArrayBuffer"
 import { decodeDetail } from "../../lib/logic/encoder-detail"
 import { randomUUID } from "../../lib/logic/randomUUID"
-
-import type { DetailCustomEvent_sendToInject } from "../../lib/contentScripts"
+import { version as versionClient } from "../../package.json"
 
 export interface ClientRequestOption extends Omit<RequestOption, "signalId"> {
   signal?: AbortSignal
@@ -84,19 +83,19 @@ const notAllow = () =>
 
 export interface HttpType {
   version: string
-  versionClient: string,
-  allowedRoot: boolean,
+  versionClient: string
+  allowedRoot: boolean
   get: (options: GetOption) => Promise<RequestResponse>
   post: (options: PostOption) => Promise<RequestResponse>
 }
 
-const allowedRoot = JSON.parse(document.documentElement.dataset.httpAllow ?? "false")
-const version = document.documentElement.dataset.httpVersion
+const allowedRoot: boolean = JSON.parse(document.documentElement.dataset.httpAllow ?? "false")
+const version: string | null = document.documentElement.dataset.httpVersion ?? null
 
 export const Http = <HttpType>{
-  get:  !allowedRoot ? notAllow : (options) => createPorter("get", options),
+  get: !allowedRoot ? notAllow : (options) => createPorter("get", options),
   post: !allowedRoot ? notAllow : (options) => createPorter("post", options),
   version,
   versionClient,
-  allowedRoot,
+  allowedRoot
 }

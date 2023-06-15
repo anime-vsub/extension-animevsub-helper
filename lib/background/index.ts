@@ -305,7 +305,7 @@ export type RequestOption = Pick<
   headers?: Record<string, string>
   responseType?: "arraybuffer" | "json" | "text"
   signalId?: string | true
-  data?: Record<string, string> | string
+  data?: Record<string, number | string | boolean> | string
 }
 
 const eventsAbort = new (class EventsAbort {
@@ -343,7 +343,7 @@ async function sendRequest({
       form = new FormData()
 
       Object.entries(data ?? {}).forEach(([key, val]) =>
-        (form as FormData).append(key, val)
+        (form as FormData).append(key, val as string)
       )
     } else {
       form = data
