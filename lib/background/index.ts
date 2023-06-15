@@ -144,10 +144,11 @@ async function initOverwriteReferer() {
 
     const ruleIds = rules.map((item) => item.id)
 
-    return () =>
+    return () => {
       chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: ruleIds
       })
+	}
   } else {
     const listenerBeforeSendHeadersOld = (
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
