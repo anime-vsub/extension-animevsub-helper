@@ -148,7 +148,7 @@ async function initOverwriteReferer() {
       chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: ruleIds
       })
-	}
+    }
   } else {
     const listenerBeforeSendHeadersOld = (
       details: browser.WebRequest.OnBeforeSendHeadersDetailsType
@@ -211,11 +211,12 @@ async function initOverwriteReferer() {
       })
 
       if (!hash) return
-      modifyHeader(details, "access-control-allow-origin", "*")
+      modifyHeader(details, "access-control-allow-origin", "*", true)
       modifyHeader(
         details,
         "access-control-allow-methods",
-        "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+        "PUT, GET, HEAD, POST, DELETE, OPTIONS",
+        true
       )
       if (ua) modifyHeader(details, "user-agent", ua)
 
@@ -238,9 +239,9 @@ async function initOverwriteReferer() {
       {
         urls: ["<all_urls>"],
         types: [
-          chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-          chrome.declarativeNetRequest.ResourceType.IMAGE,
-          chrome.declarativeNetRequest.ResourceType.MEDIA
+          browser.webRequest.ResourceType.XMLHTTPREQUEST,
+          browser.webRequest.ResourceType.IMAGE,
+          browser.webRequest.ResourceType.MEDIA
         ]
       },
       [
@@ -254,9 +255,9 @@ async function initOverwriteReferer() {
       {
         urls: ["<all_urls>"],
         types: [
-          chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-          chrome.declarativeNetRequest.ResourceType.IMAGE,
-          chrome.declarativeNetRequest.ResourceType.MEDIA
+          browser.webRequest.ResourceType.XMLHTTPREQUEST,
+          browser.webRequest.ResourceType.IMAGE,
+          browser.webRequest.ResourceType.MEDIA
         ]
       },
       [
