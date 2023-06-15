@@ -8,6 +8,8 @@ import browser from "webextension-polyfill"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 import { modifyHeader } from "../logic/modify-header"
 
+declare const __MV3__: boolean
+
 const mapDeclareReferrer = {
   "#animevsub-vsub": "https://animevietsub.tv/",
   "#vuighe": "https://vuighe.net/",
@@ -36,15 +38,15 @@ const EXTRA = "_extra"
 // eslint-disable-next-line functional/no-let
 let runnedOverwriteReferer = false
 
-// eslint-disable-next-line functional/no-let
+// eslint-disable-next-line functional/no-let, prefer-const
 let uninstallerOverwrite: Promise<(() => void) | undefined> | undefined
 /** @description this paragraph modifies the title of anything that has the #vsub tag, it looks powerful in the middle */
 async function initOverwriteReferer() {
   if (runnedOverwriteReferer) return
   runnedOverwriteReferer = true
-    ; (await uninstallerOverwrite)?.()
+  ; (await uninstallerOverwrite)?.()
 
-  if (typeof chrome !== "undefined" && chrome.declarativeNetRequest) {
+  if (__MV3__) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: (
         await chrome.declarativeNetRequest.getDynamicRules()
@@ -394,7 +396,7 @@ async function sendRequest({
         headers: await mergeSetCookie(res.headers, res.url),
         data:
           responseType === "arraybuffer"
-            ? // eslint-disable-next-line promise/no-nesting, indent
+            ? // eslint-disable-next-line promise/no-nesting
             await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,

@@ -1,23 +1,24 @@
-import browser from "webextension-polyfill"
+import type browser from "webextension-polyfill"
 
 export function modifyHeader(
   details:
     | browser.WebRequest.OnBeforeSendHeadersDetailsType
-    | browser.WebRequest.OnHeadersReceived,
+    | browser.WebRequest.OnHeadersReceivedDetailsType,
   name: string,
   value: string,
   isResponse = false
 ) {
   const key = isResponse ? "responseHeaders" : "requestHeaders"
-  const refererCurrent = details[key]?.find(
+  const refererCurrent = (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"]?.find(
     (item) => item.name.toLowerCase() === name
   )
 
   if (refererCurrent) {
     refererCurrent.value = value
   } else {
-    if (!details[key]) details[key] = []
-    details[key].push({
+    if (!(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"]) (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"] = []
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ; (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"]!.push({
       name,
       value
     })

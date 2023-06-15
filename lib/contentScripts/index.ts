@@ -2,15 +2,12 @@
 /* eslint-disable no-undef */
 
 import { sendMessage } from "@tachibana-shin/webext-bridge/content-script"
-import browser from "webextension-polyfill"
-import { version } from "../../package.json"
 
+import { version } from "../../package.json"
 import type { RequestResponse } from "../background"
 import { isFirefox } from "../env"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { encodeDetail } from "../logic/encoder-detail"
-
-import type { DetailCustomEvent_sendToIndex } from "./inject"
 
 export interface DetailCustomEvent_sendToInject {
   id: string

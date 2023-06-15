@@ -80,6 +80,9 @@ importers:
       '@types/cookie':
         specifier: ^0.5.1
         version: 0.5.1
+      '@types/firefox-webext-browser':
+        specifier: ^94.0.1
+        version: 94.0.1
       tsup:
         specifier: ^6.7.0
         version: 6.7.0(typescript@4.8.4)
@@ -96,8 +99,8 @@ importers:
         specifier: 6.0.0-rc3
         version: 6.0.0-rc3
       webextension-polyfill:
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: 0.9.0
+        version: 0.9.0
 
   manifest-v2:
     devDependencies:
@@ -114,8 +117,8 @@ importers:
         specifier: ^2.9.16
         version: 2.9.16
       webextension-polyfill:
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.9.0
+        version: 0.9.0
 
   manifest-v3:
     dependencies:
@@ -147,6 +150,9 @@ importers:
       vite:
         specifier: 2.9.16
         version: 2.9.16
+      webextension-polyfill:
+        specifier: 0.9.0
+        version: 0.9.0
       yaml:
         specifier: ^2.1.3
         version: 2.1.3
@@ -942,6 +948,10 @@ packages:
 
   /@types/filewriter@0.0.29:
     resolution: {integrity: sha512-BsPXH/irW0ht0Ji6iw/jJaK8Lj3FJemon2gvEqHKpCdDCeemHa+rI3WBGq5z7cDMZgoLjY40oninGxqk+8NzNQ==}
+    dev: true
+
+  /@types/firefox-webext-browser@94.0.1:
+    resolution: {integrity: sha512-I6iHRQJSTZ+gYt2IxdH2RRAMvcUyK8v5Ig7fHQR0IwUNYP7hz9+cziBVIKxLCO6XI7fiyRsNOWObfl3/4Js2Lg==}
     dev: true
 
   /@types/har-format@1.2.11:
@@ -6690,10 +6700,6 @@ packages:
       serialize-error: 9.1.1
       tiny-uid: 1.1.2
       webextension-polyfill: 0.9.0
-    dev: true
-
-  /webextension-polyfill@0.10.0:
-    resolution: {integrity: sha512-c5s35LgVa5tFaHhrZDnr3FpQpjj1BB+RXhLTYUxGqBVN460HkbM8TBtEqdXWbpTKfzwCcjAZVF7zXCYSKtcp9g==}
     dev: true
 
   /webextension-polyfill@0.9.0:

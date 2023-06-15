@@ -2,9 +2,9 @@
 
 import { dirname, relative } from "path"
 
+import yaml from "@modyfi/vite-plugin-yaml"
 import type { UserConfig } from "vite"
 import { defineConfig } from "vite"
-import yaml from "@modyfi/vite-plugin-yaml"
 
 import { isDev, port, r } from "./scripts/utils"
 
@@ -17,7 +17,8 @@ export const sharedConfig: UserConfig = {
     }
   },
   define: {
-    __DEV__: isDev
+    __DEV__: isDev,
+    __MV3__: JSON.stringify(false)
   },
   plugins: [
     yaml(),
