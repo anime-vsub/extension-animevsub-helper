@@ -3,6 +3,7 @@ import type { Manifest } from "webextension-polyfill"
 
 import type PkgType from "../package.json"
 import { isDev, port, r } from "../scripts/utils"
+import Yaml from "yaml"
 
 export async function getManifest() {
   const pkg = (await fs.readJSON(r("package.json"))) as typeof PkgType
@@ -26,9 +27,13 @@ export async function getManifest() {
     host_permissions: ["*://*/*"],
     content_scripts: [
       {
-        matches: ["http://*/*", "https://*/*"],
-		all_frames: true,
-		run_at: "document_start",
+        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8")).hosts.map(host => {
+			return [
+				`http://${host}/*`, `https://${host}/*`
+			]
+		}).flat(1),
+        all_frames: true,
+        run_at: "document_start",
         js: ["./dist/contentScripts/index.global.js"]
       }
     ],
