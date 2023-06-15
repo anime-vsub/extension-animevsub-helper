@@ -35,4 +35,5 @@ export default defineConfig(() => ({
     __MV3__: JSON.stringify(true)
   },
   treeshaking: true,
+  minify: !isDev
 }))
