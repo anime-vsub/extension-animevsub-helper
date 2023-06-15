@@ -42,7 +42,7 @@ let uninstallerOverwrite: Promise<(() => void) | undefined> | undefined
 async function initOverwriteReferer() {
   if (runnedOverwriteReferer) return
   runnedOverwriteReferer = true
-  ;(await uninstallerOverwrite)?.()
+    ; (await uninstallerOverwrite)?.()
 
   if (typeof chrome !== "undefined" && chrome.declarativeNetRequest) {
     await chrome.declarativeNetRequest.updateDynamicRules({
@@ -234,14 +234,19 @@ async function initOverwriteReferer() {
         // "extraHeaders"
       ]
     )
+    const ResourceType = {
+      XMLHTTPREQUEST: "xmlhttprequest",
+      IMAGE: "image",
+      MEDIA: "media"
+    } as const
     browser.webRequest.onBeforeSendHeaders.addListener(
       listenerBeforeSendHeaders,
       {
         urls: ["<all_urls>"],
         types: [
-          browser.webRequest.ResourceType.XMLHTTPREQUEST,
-          browser.webRequest.ResourceType.IMAGE,
-          browser.webRequest.ResourceType.MEDIA
+          ResourceType.XMLHTTPREQUEST,
+          ResourceType.IMAGE,
+          ResourceType.MEDIA
         ]
       },
       [
@@ -255,9 +260,9 @@ async function initOverwriteReferer() {
       {
         urls: ["<all_urls>"],
         types: [
-          browser.webRequest.ResourceType.XMLHTTPREQUEST,
-          browser.webRequest.ResourceType.IMAGE,
-          browser.webRequest.ResourceType.MEDIA
+          ResourceType.XMLHTTPREQUEST,
+          ResourceType.IMAGE,
+          ResourceType.MEDIA
         ]
       },
       [
@@ -390,7 +395,7 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             ? // eslint-disable-next-line promise/no-nesting, indent
-              await res.arrayBuffer().then(arrayBufferToBase64)
+            await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status
