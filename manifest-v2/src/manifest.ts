@@ -24,14 +24,27 @@ export async function getManifest() {
       48: "./assets/icon-512.png",
       128: "./assets/icon-512.png"
     },
-    permissions: ["activeTab", "http://*/", "https://*/", "cookies", "webRequest", "webRequestBlocking"],
+    browser_specific_settings: {
+      gecko: {
+        id: "contact@animevsub.eu.org",
+        strict_min_version: "79.0"
+      }
+    },
+    permissions: [
+      "activeTab",
+      "http://*/",
+      "https://*/",
+      "cookies",
+      "webRequest",
+      "webRequestBlocking"
+    ],
     content_scripts: [
       {
-        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8")).hosts.map(host => {
-          return [
-            `http://${host}/*`, `https://${host}/*`
-          ]
-        }).flat(1),
+        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8"))
+          .hosts.map((host) => {
+            return [`http://${host}/*`, `https://${host}/*`]
+          })
+          .flat(1),
         all_frames: true,
         run_at: "document_start",
         js: ["./dist/contentScripts/index.global.js"]
