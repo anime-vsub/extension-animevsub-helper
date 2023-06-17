@@ -26,7 +26,7 @@ export async function getManifest() {
     },
     browser_specific_settings: {
       gecko: {
-        id: "{{26005fb7-3d84-4144-a688-a058944123b3}}",
+        id: "26005fb7-3d84-4144-a688-a058944123b3",
         strict_min_version: "79.0"
       }
     },
