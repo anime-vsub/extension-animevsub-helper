@@ -7,14 +7,10 @@ import browser from "webextension-polyfill"
 
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 import { modifyHeader } from "../logic/modify-header"
+import mapDeclareReferrer from "../../map-referer.json"
 
 declare const __MV3__: boolean
 
-const mapDeclareReferrer = {
-  "#animevsub-vsub": "https://animevietsub.tv/",
-  "#vuighe": "https://vuighe.net/",
-  "#star": ""
-} as const
 const hashesDeclareReferrer = Object.keys(
   mapDeclareReferrer
 ) as (keyof typeof mapDeclareReferrer)[]
