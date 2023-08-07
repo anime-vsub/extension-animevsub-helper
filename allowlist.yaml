@@ -1,23 +1,19 @@
 hosts:
-  - animevsub.ga
   - animevsub.netlify.app
   - animevsub.eu.org
   
-  - m.animevsub.netlify.app
   - m.animevsub.eu.org
-  - m.animevsub.ga
-  - pwa.animevsub.netlify.app
-  - pwa.animevsub.eu.org
-  - pwa.animevsub.ga
 
   - vuitruyen.netlify.app
   - vuitruyen.eu.org
 
   - mangaraiku.eu.org
   - m.mangaraiku.eu.org
-  - pwa.mangaraiku.eu.org
+  - raiku.eu.org
+  - mraiku.eu.org
+  - raiku.netlify.app
+  - mangaraiku.netlify.app
   
   - tariteam.github.io/download-video # beta code
   - example.com
   - localhost
-  - 192.168.0.113
