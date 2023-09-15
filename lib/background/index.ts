@@ -5,9 +5,9 @@ import { onMessage } from "@tachibana-shin/webext-bridge/background"
 import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
+import mapDeclareReferrer from "../../map-referer.json"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 import { modifyHeader } from "../logic/modify-header"
-import mapDeclareReferrer from "../../map-referer.json"
 
 declare const __MV3__: boolean
 
@@ -40,7 +40,7 @@ let uninstallerOverwrite: Promise<(() => void) | undefined> | undefined
 async function initOverwriteReferer() {
   if (runnedOverwriteReferer) return
   runnedOverwriteReferer = true
-  ; (await uninstallerOverwrite)?.()
+  ;(await uninstallerOverwrite)?.()
 
   if (__MV3__) {
     await chrome.declarativeNetRequest.updateDynamicRules({
@@ -428,3 +428,16 @@ async function mergeSetCookie(headers: Headers, url: string) {
 
   return obj
 }
+
+// function auto fix
+onMessage<{
+  type: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: any
+}>("tabs", async ({ data }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (browser.tabs as unknown as any)[data.type].apply(
+    browser.tabs,
+    data.args
+  )
+})

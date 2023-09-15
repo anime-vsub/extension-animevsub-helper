@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-undef */
+import type { ArgumentsType } from "vitest"
+
 import type { RequestOption, RequestResponse } from "../../lib/background"
 import type { DetailCustomEvent_sendToInject } from "../../lib/contentScripts"
 import { base64ToArrayBuffer } from "../../lib/logic/base64ToArrayBuffer"
@@ -89,8 +91,11 @@ export interface HttpType {
   post: (options: PostOption) => Promise<RequestResponse>
 }
 
-const allowedRoot: boolean = JSON.parse(document.documentElement.dataset.httpAllow ?? "false")
-const version: string | null = document.documentElement.dataset.httpVersion ?? null
+const allowedRoot: boolean = JSON.parse(
+  document.documentElement.dataset.httpAllow ?? "false"
+)
+const version: string | null =
+  document.documentElement.dataset.httpVersion ?? null
 
 export const Http = <HttpType>{
   get: !allowedRoot ? notAllow : (options) => createPorter("get", options),
@@ -98,4 +103,57 @@ export const Http = <HttpType>{
   version,
   versionClient,
   allowedRoot
+}
+
+export const tabsApi = JSON.parse(
+  document.documentElement.dataset.tabsApi ?? "false"
+)
+export function execTabs<
+  T extends
+    | "discard"
+    | "query"
+    | "reload"
+    | "connect"
+    | "discard"
+    | "duplicate"
+    // | "show"
+    // | "hide"
+    | "move"
+    | "remove"
+    | "update"
+>(
+  type: T,
+  args: ArgumentsType<typeof chrome.tabs[T]>
+): Promise<Awaited<ReturnType<typeof chrome.tabs[T]>>> {
+  // eslint-disable-next-line functional/no-throw-statement
+  if (!tabsApi) throw new Error("Version extension not support tabs api.")
+
+  return new Promise<Awaited<ReturnType<typeof chrome.tabs[T]>>>(
+    (resolve, reject) => {
+      const id = randomUUID()
+      const handler = (({
+        detail
+      }: CustomEvent<{
+        id: string
+        ok: boolean
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        res: any
+      }>) => {
+        detail = decodeDetail(detail)
+        if (detail.id === id) {
+          if (detail.ok) resolve(detail.res)
+          else reject(detail.res)
+
+          document.removeEventListener("tabs:response", handler)
+        }
+      }) as EventListenerOrEventListenerObject
+      document.addEventListener("tabs:response", handler)
+
+      document.dispatchEvent(
+        new CustomEvent("tabs", {
+          detail: { id, type, args }
+        })
+      )
+    }
+  )
 }
