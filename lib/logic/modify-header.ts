@@ -9,16 +9,25 @@ export function modifyHeader(
   isResponse = false
 ) {
   const key = isResponse ? "responseHeaders" : "requestHeaders"
-  const refererCurrent = (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"]?.find(
-    (item) => item.name.toLowerCase() === name
-  )
+  const refererCurrent = (
+    details as browser.WebRequest.OnBeforeSendHeadersDetailsType
+  )[key as "requestHeaders"]?.find((item) => item.name.toLowerCase() === name)
 
   if (refererCurrent) {
     refererCurrent.value = value
   } else {
-    if (!(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"]) (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"] = []
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ; (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[key as "requestHeaders"]!.push({
+    if (
+      !(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
+        key as "requestHeaders"
+      ]
+    )
+      (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
+        key as "requestHeaders"
+      ] = []
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ;(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
+      key as "requestHeaders"
+    ]!.push({
       name,
       value
     })

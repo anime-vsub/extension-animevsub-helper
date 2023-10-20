@@ -44,9 +44,9 @@ async function initOverwriteReferer() {
 
   if (__MV3__) {
     await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: (
-        await chrome.declarativeNetRequest.getDynamicRules()
-      ).map((item) => item.id)
+      removeRuleIds: (await chrome.declarativeNetRequest.getDynamicRules()).map(
+        (item) => item.id
+      )
     })
 
     // eslint-disable-next-line functional/no-let
@@ -393,7 +393,7 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             ? // eslint-disable-next-line promise/no-nesting
-            await res.arrayBuffer().then(arrayBufferToBase64)
+              await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status
