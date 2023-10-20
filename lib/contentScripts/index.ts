@@ -106,7 +106,7 @@ document.addEventListener("set:referer", (async ({
   document.dispatchEvent(
     new CustomEvent("res:set:referer", {
       detail: {
-        id: detail.id,
+        id: detail.id
       }
     })
   )

@@ -86,10 +86,7 @@ export function createRule(endsWith: string, referer: string) {
         value: mapUa[typeUa]
       })
       ruleCloned.condition.urlFilter =
-        ruleCloned.condition.urlFilter?.slice(0, -1) +
-        "_ua" +
-        typeUa +
-        "|"
+        ruleCloned.condition.urlFilter?.slice(0, -1) + "_ua" + typeUa + "|"
 
       rules.push(ruleCloned)
     })

@@ -12,9 +12,7 @@ export async function checkReferer(name: string): Promise<boolean> {
 
   if (inStore !== undefined) return inStore
 
-  const {
-    [id]: value
-  } = await Browser.storage.sync.get([id])
+  const { [id]: value } = await Browser.storage.sync.get([id])
 
   const installed = value!!
   store.set(id, installed)
@@ -28,10 +26,7 @@ export async function saveReferer(name: string, value: string) {
 
   const rules = createRule(name, value)
 
-  await Promise.all([
-    installRules(rules),
-    saveRefererToStore(name, value)
-  ])
+  await Promise.all([installRules(rules), saveRefererToStore(name, value)])
 }
 async function saveRefererToStore(name: string, value: string) {
   const referers = await getReferers()
@@ -43,4 +38,3 @@ async function saveRefererToStore(name: string, value: string) {
   })
   store.set(name, true)
 }
-

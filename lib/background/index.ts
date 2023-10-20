@@ -11,9 +11,11 @@ import { getReferers } from "./logic/get-referers"
 import { installReferers } from "./logic/install-referer"
 
 // setup install rules default
-const setup = getReferers().then(objects => installReferers(objects as Record<string, string>))
+const setup = getReferers().then((objects) =>
+  installReferers(objects as Record<string, string>)
+)
 
-onMessage("set:referer", async object => {
+onMessage("set:referer", async (object) => {
   await setup
   await installReferers(object as unknown as Record<string, string>)
 })
@@ -125,7 +127,7 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             ? // eslint-disable-next-line promise/no-nesting
-            await res.arrayBuffer().then(arrayBufferToBase64)
+              await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status

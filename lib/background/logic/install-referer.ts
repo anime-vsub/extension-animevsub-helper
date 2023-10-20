@@ -1,5 +1,5 @@
-import { createRule } from "./create-rule";
-import { installRules } from "./install-rules";
+import { createRule } from "./create-rule"
+import { installRules } from "./install-rules"
 
 export function installReferer(name: string, value: string) {
   return installRules(createRule(name, value))

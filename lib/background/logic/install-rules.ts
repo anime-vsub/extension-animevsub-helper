@@ -1,4 +1,3 @@
-
 import browser from "webextension-polyfill"
 import { HASH } from "../../env"
 import { addHeader, removeHeader, setHeader } from "../../logic/modify-header"
@@ -19,7 +18,6 @@ export async function installRules(rules: chrome.declarativeNetRequest.Rule[]) {
       chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: ruleIds
       })
-
     }
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: rules
@@ -27,17 +25,17 @@ export async function installRules(rules: chrome.declarativeNetRequest.Rule[]) {
 
     return uninstall
   } else {
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       let rules = storeRulesMV2.get(rule.condition.urlFilter!)
       if (!rules) {
-        storeRulesMV2.set(rule.condition.urlFilter!, rules = [])
+        storeRulesMV2.set(rule.condition.urlFilter!, (rules = []))
       }
 
       rules.push(rule)
     })
 
     const uninstall = () => {
-      rules.forEach(rule => {
+      rules.forEach((rule) => {
         const rules = storeRulesMV2.get(rule.condition.urlFilter!)
         if (rules) {
           rules.splice(rules.indexOf(rule) >>> 0, 1)
@@ -45,10 +43,10 @@ export async function installRules(rules: chrome.declarativeNetRequest.Rule[]) {
       })
     }
 
-
     if (registeredMV2) return uninstall
 
-    const createListener = (isResponse: boolean) =>
+    const createListener =
+      (isResponse: boolean) =>
       (details: browser.WebRequest.OnBeforeSendHeadersDetailsType) => {
         const hash = details.url.slice(details.url.indexOf(HASH) >>> 0)
         if (!hash) return
@@ -56,27 +54,28 @@ export async function installRules(rules: chrome.declarativeNetRequest.Rule[]) {
         const rules = storeRulesMV2.get(hash)
         if (!rules) return
 
-        rules.forEach(rule => {
+        rules.forEach((rule) => {
           if (rule.action.type !== "modifyHeaders") {
             return
           }
 
-          rule.action[isResponse ? 'responseHeaders' : 'requestHeaders']?.forEach(headers => {
+          rule.action[
+            isResponse ? "responseHeaders" : "requestHeaders"
+          ]?.forEach((headers) => {
             switch (headers.operation) {
-              case 'remove':
+              case "remove":
                 removeHeader(details, headers.header, isResponse)
                 break
-              case 'append':
+              case "append":
                 addHeader(details, headers.header, headers.value!, isResponse)
                 break
-              case 'set':
+              case "set":
               default:
                 setHeader(details, headers.header, headers.value!, isResponse)
             }
           })
-        });
+        })
       }
-
 
     browser.webRequest.onBeforeSendHeaders.addListener(
       createListener(false),
@@ -111,9 +110,6 @@ export async function installRules(rules: chrome.declarativeNetRequest.Rule[]) {
       ]
     )
 
-
     return uninstall
-
-
   }
 }
