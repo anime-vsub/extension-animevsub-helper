@@ -68,7 +68,7 @@ function createPorter(method: string, options: ClientRequestOption) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetOption extends ClientRequestOption { }
+export interface GetOption extends ClientRequestOption {}
 export interface PostOption extends ClientRequestOption {
   data?: RequestOption["data"]
 }
@@ -110,25 +110,25 @@ export const tabsApi = JSON.parse(
 )
 export function execTabs<
   T extends
-  | "discard"
-  | "query"
-  | "reload"
-  | "connect"
-  | "discard"
-  | "duplicate"
-  // | "show"
-  // | "hide"
-  | "move"
-  | "remove"
-  | "update"
+    | "discard"
+    | "query"
+    | "reload"
+    | "connect"
+    | "discard"
+    | "duplicate"
+    // | "show"
+    // | "hide"
+    | "move"
+    | "remove"
+    | "update"
 >(
   type: T,
-  args: ArgumentsType<typeof chrome.tabs[T]>
-): Promise<Awaited<ReturnType<typeof chrome.tabs[T]>>> {
+  args: ArgumentsType<(typeof chrome.tabs)[T]>
+): Promise<Awaited<ReturnType<(typeof chrome.tabs)[T]>>> {
   // eslint-disable-next-line functional/no-throw-statement
   if (!tabsApi) throw new Error("Version extension not support tabs api.")
 
-  return new Promise<Awaited<ReturnType<typeof chrome.tabs[T]>>>(
+  return new Promise<Awaited<ReturnType<(typeof chrome.tabs)[T]>>>(
     (resolve, reject) => {
       const id = randomUUID()
       const handler = (({
@@ -159,11 +159,9 @@ export function execTabs<
 }
 
 export function setReferers(referers: Record<string, string>) {
+  const id = randomUUID()
   return new Promise<void>((resolve) => {
-    const id = randomUUID()
-    const handler = (({
-      detail
-    }: CustomEvent<{ id: string }>) => {
+    const handler = (({ detail }: CustomEvent<{ id: string }>) => {
       if (detail.id === id) {
         document.removeEventListener("res:set:referer", handler)
         resolve()

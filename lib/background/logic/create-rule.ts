@@ -15,10 +15,11 @@ const mapUa = {
 } as const
 
 const typesUa = Object.keys(mapUa) as (keyof typeof mapUa)[]
-let currentId = 0
+let currentId = 1
 
 export function createRule(endsWith: string, referer: string) {
-  endsWith = `${HASH}${endsWith}`
+  console.log(endsWith, referer)
+  // endsWith = `${HASH}${endsWith}`
   const rules: chrome.declarativeNetRequest.Rule[] = [
     {
       id: currentId++,

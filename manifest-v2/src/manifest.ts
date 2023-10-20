@@ -36,7 +36,8 @@ export async function getManifest() {
       "https://*/",
       "cookies",
       "webRequest",
-      "webRequestBlocking"
+      "webRequestBlocking",
+      "storage"
     ],
     content_scripts: [
       {

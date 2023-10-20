@@ -25,7 +25,7 @@
     "kolorist": "^1.8.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.0.3",
-    "rimraf": "^5.0.5",
+    "rimraf": "^4.4.1",
     "tsx": "^3.14.0",
     "typescript": "^5.2.2",
     "vite": "4.5.0",

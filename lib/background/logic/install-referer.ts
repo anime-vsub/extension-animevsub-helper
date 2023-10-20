@@ -9,5 +9,6 @@ export function installReferers(referers: Record<string, string>) {
     rules.push(...createRule(name, value))
     return rules
   }, [] as chrome.declarativeNetRequest.Rule[])
+  console.log(rules)
   return installRules(rules)
 }

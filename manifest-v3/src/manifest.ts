@@ -1,9 +1,9 @@
 import fs from "fs-extra"
 import type { Manifest } from "webextension-polyfill"
+import Yaml from "yaml"
 
 import type PkgType from "../package.json"
 import { isDev, port, r } from "../scripts/utils"
-import Yaml from "yaml"
 
 export async function getManifest() {
   const pkg = (await fs.readJSON(r("package.json"))) as typeof PkgType
@@ -23,15 +23,15 @@ export async function getManifest() {
       48: "./assets/icon-512.png",
       128: "./assets/icon-512.png"
     },
-    permissions: ["activeTab", "scripting", "cookies", "declarativeNetRequest"],
+    permissions: ["activeTab", "scripting", "cookies", "declarativeNetRequest", "storage"],
     host_permissions: ["*://*/*"],
     content_scripts: [
       {
-        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8")).hosts.map(host => {
-			return [
-				`http://${host}/*`, `https://${host}/*`
-			]
-		}).flat(1),
+        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8"))
+          .hosts.map((host) => {
+            return [`http://${host}/*`, `https://${host}/*`]
+          })
+          .flat(1),
         all_frames: true,
         run_at: "document_start",
         js: ["./dist/contentScripts/index.global.js"]
@@ -49,8 +49,10 @@ export async function getManifest() {
     // we use a background script to always inject the latest version
     // see src/background/contentScriptHMR.ts
     // delete manifest.content_scripts
-    // eslint-disable-next-line functional/immutable-data
+
     manifest.permissions?.push("webNavigation")
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
+    ;(manifest.background as unknown as any)!.type = "module"
   }
 
   return manifest

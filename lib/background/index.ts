@@ -5,14 +5,19 @@ import { onMessage } from "@tachibana-shin/webext-bridge/background"
 import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
-import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
+import referersDefault from "../../map-referer.json"
 import { EXTRA } from "../env"
+import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
+
 import { getReferers } from "./logic/get-referers"
 import { installReferers } from "./logic/install-referer"
 
 // setup install rules default
 const setup = getReferers().then((objects) =>
-  installReferers(objects as Record<string, string>)
+  installReferers({
+    ...referersDefault,
+    ...(objects as Record<string, string>)
+  })
 )
 
 onMessage("set:referer", async (object) => {
@@ -49,6 +54,7 @@ export type RequestOption = Pick<
   data?: Record<string, number | string | boolean> | string
 }
 
+// eslint-disable-next-line functional/no-classes
 const eventsAbort = new (class EventsAbort {
   // eslint-disable-next-line func-call-spacing
   private readonly store = new Map<string, () => void>()
@@ -127,7 +133,7 @@ async function sendRequest({
         data:
           responseType === "arraybuffer"
             ? // eslint-disable-next-line promise/no-nesting
-              await res.arrayBuffer().then(arrayBufferToBase64)
+            await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status
