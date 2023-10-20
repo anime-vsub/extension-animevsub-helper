@@ -1,5 +1,5 @@
 {
-  "version": "1.0.17",
+  "version": "1.0.18",
   "scripts": {
     "lint": "eslint lib/ --ext ts",
     "format": "prettier -w lib/",
