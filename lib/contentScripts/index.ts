@@ -115,3 +115,4 @@ document.addEventListener("set:referer", (async ({
 document.documentElement.dataset.httpVersion = version
 document.documentElement.dataset.httpAllow = JSON.stringify(true)
 document.documentElement.dataset.tabsApi = JSON.stringify(true)
+document.documentElement.dataset.customReferer = JSON.stringify(true)

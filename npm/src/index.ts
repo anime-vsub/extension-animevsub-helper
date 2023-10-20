@@ -178,3 +178,7 @@ export function setReferers(referers: Record<string, string>) {
     )
   })
 }
+
+export const customReferer = JSON.parse(
+  document.documentElement.dataset.customReferer ?? "false"
+)
