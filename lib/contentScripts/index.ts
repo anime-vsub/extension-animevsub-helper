@@ -96,6 +96,21 @@ document.addEventListener("tabs", (async ({
     })
   )
 }) as unknown as EventListenerOrEventListenerObject)
+document.addEventListener("set:referer", (async ({
+  detail
+}: CustomEvent<{
+  id: string
+  referers: Record<string, string>
+}>) => {
+  await sendMessage("set:referer", detail.referers)
+  document.dispatchEvent(
+    new CustomEvent("res:set:referer", {
+      detail: {
+        id: detail.id
+      }
+    })
+  )
+}) as unknown as EventListenerOrEventListenerObject)
 
 document.documentElement.dataset.httpVersion = version
 document.documentElement.dataset.httpAllow = JSON.stringify(true)

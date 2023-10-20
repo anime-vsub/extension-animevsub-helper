@@ -68,7 +68,7 @@ function createPorter(method: string, options: ClientRequestOption) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetOption extends ClientRequestOption {}
+export interface GetOption extends ClientRequestOption { }
 export interface PostOption extends ClientRequestOption {
   data?: RequestOption["data"]
 }
@@ -110,17 +110,17 @@ export const tabsApi = JSON.parse(
 )
 export function execTabs<
   T extends
-    | "discard"
-    | "query"
-    | "reload"
-    | "connect"
-    | "discard"
-    | "duplicate"
-    // | "show"
-    // | "hide"
-    | "move"
-    | "remove"
-    | "update"
+  | "discard"
+  | "query"
+  | "reload"
+  | "connect"
+  | "discard"
+  | "duplicate"
+  // | "show"
+  // | "hide"
+  | "move"
+  | "remove"
+  | "update"
 >(
   type: T,
   args: ArgumentsType<typeof chrome.tabs[T]>
@@ -156,4 +156,25 @@ export function execTabs<
       )
     }
   )
+}
+
+export function setReferers(referers: Record<string, string>) {
+  return new Promise<void>((resolve) => {
+    const id = randomUUID()
+    const handler = (({
+      detail
+    }: CustomEvent<{ id: string }>) => {
+      if (detail.id === id) {
+        document.removeEventListener("res:set:referer", handler)
+        resolve()
+      }
+    }) as EventListenerOrEventListenerObject
+    document.addEventListener("res:set:referer", handler)
+
+    document.dispatchEvent(
+      new CustomEvent("set:referer", {
+        detail: { id, referers }
+      })
+    )
+  })
 }
