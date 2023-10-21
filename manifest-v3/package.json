@@ -21,7 +21,7 @@
     "pack:xpi": "cross-env WEB_EXT_ARTIFACTS_DIR=./ web-ext build --source-dir ./extension --filename mv3-extension.xpi --overwrite-dest",
     "start:chromium": "web-ext run --source-dir ./extension --target=chromium",
     "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
-    "clear": "",
+    "clear": "rimraf extension mv3-extension.*",
     "release": "bumpp package.json --commit \"[mv3] chore: release v%s\" --tag \"mv3_v%s\" --push"
   },
   "devDependencies": {
