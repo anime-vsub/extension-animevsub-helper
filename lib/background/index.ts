@@ -20,7 +20,7 @@ const setup = getReferers().then((objects) =>
   })
 )
 
-onMessage("set:referer", async (object) => {
+onMessage("set:referers", async (object) => {
   await setup
   await installReferers(object as unknown as Record<string, string>)
 })

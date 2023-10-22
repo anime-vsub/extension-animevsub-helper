@@ -107,7 +107,7 @@ export const Http = <HttpType>{
 
 export const tabsApi = JSON.parse(
   document.documentElement.dataset.tabsApi ?? "false"
-)
+) as boolean
 export function execTabs<
   T extends
     | "discard"
@@ -163,14 +163,14 @@ export function setReferers(referers: Record<string, string>) {
   return new Promise<void>((resolve) => {
     const handler = (({ detail }: CustomEvent<{ id: string }>) => {
       if (detail.id === id) {
-        document.removeEventListener("res:set:referer", handler)
+        document.removeEventListener("res:set:referers", handler)
         resolve()
       }
     }) as EventListenerOrEventListenerObject
-    document.addEventListener("res:set:referer", handler)
+    document.addEventListener("res:set:referers", handler)
 
     document.dispatchEvent(
-      new CustomEvent("set:referer", {
+      new CustomEvent("set:referers", {
         detail: { id, referers }
       })
     )
@@ -179,4 +179,4 @@ export function setReferers(referers: Record<string, string>) {
 
 export const customReferer = JSON.parse(
   document.documentElement.dataset.customReferer ?? "false"
-)
+) as boolean

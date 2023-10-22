@@ -96,15 +96,15 @@ document.addEventListener("tabs", (async ({
     })
   )
 }) as unknown as EventListenerOrEventListenerObject)
-document.addEventListener("set:referer", (async ({
+document.addEventListener("set:referers", (async ({
   detail
 }: CustomEvent<{
   id: string
   referers: Record<string, string>
 }>) => {
-  await sendMessage("set:referer", detail.referers)
+  await sendMessage("set:referers", detail.referers)
   document.dispatchEvent(
-    new CustomEvent("res:set:referer", {
+    new CustomEvent("res:set:referers", {
       detail: {
         id: detail.id
       }
