@@ -159,7 +159,15 @@ export function execTabs<
   )
 }
 
+export const customReferer = JSON.parse(
+  document.documentElement.dataset.customReferer ?? "false"
+) as boolean
+
 export function setReferrers(referrers: Record<string, string>) {
+  if (!customReferer)
+    // eslint-disable-next-line functional/no-throw-statements
+    throw new Error("Version extension not support setReferrers api.")
+
   const id = randomUUID()
   return new Promise<void>((resolve) => {
     const handler = (({ detail }: CustomEvent<{ id: string }>) => {
@@ -178,7 +186,3 @@ export function setReferrers(referrers: Record<string, string>) {
     )
   })
 }
-
-export const customReferer = JSON.parse(
-  document.documentElement.dataset.customReferer ?? "false"
-) as boolean
