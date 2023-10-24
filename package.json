@@ -9,7 +9,7 @@
     "release:mv2": "cd manifest-v2 && pnpm release",
     "release:mv3": "cd manifest-v3 && pnpm release",
     "npm": "cd npm && pnpm publish",
-    "release": "bumpp package.json manifest-v2/package.json manifest-v3/package.json npm/package.json  --commit --push --tag"
+    "release": "bumpp package.json manifest-v2/package.json manifest-v3/package.json npm/package.json  --commit --push --tag && pnpm npm"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.4.1",
