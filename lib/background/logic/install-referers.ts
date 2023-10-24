@@ -8,6 +8,7 @@ export function installReferrers(referers: Record<string, string>) {
   const rules = Object.entries(referers).reduce((rules, [name, value]) => {
     rules.push(...createRule(name, value))
     return rules
+  // eslint-disable-next-line no-undef
   }, [] as chrome.declarativeNetRequest.Rule[])
   console.log(rules)
   return installRules(rules)
