@@ -118,6 +118,8 @@ async function sendRequest({
 
   await setup
 
+  if (headers?.["c-cookie"]) await setCookie(url, headers["c-cookie"])
+
   return fetch(url, {
     headers: new Headers(headers),
     credentials: "include",
@@ -181,3 +183,27 @@ onMessage<{
     data.args
   )
 })
+
+async function setCookie(url: string, cookie: string) {
+  return Promise.all(
+    cookie.split(";").map(async (item) => {
+      const equal = item.indexOf("=")
+      if (equal === -1) return
+
+      const name = item.slice(0, equal)
+      const value = item.slice(equal + 1)
+
+      await chrome.cookies.set({
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
+        domain: new URL(url).hostname,
+        name,
+        path: "/",
+        value,
+        url,
+        httpOnly: true,
+        secure: false,
+        storeId: "0"
+      })
+    })
+  )
+}
