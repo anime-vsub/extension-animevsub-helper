@@ -1,4 +1,6 @@
-import { EXTRA, HASH } from "../../env"
+/* eslint-disable no-undef */
+import allowlist from "../../../allowlist.yaml"
+import { EXTRA } from "../../env"
 
 const mapUa = {
   firefox:
@@ -14,7 +16,46 @@ const mapUa = {
     "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36 Edg/114.0.1823.41"
 } as const
 
+const RuleActionType =
+  typeof chrome?.declarativeNetRequest !== "undefined"
+    ? chrome.declarativeNetRequest.RuleActionType
+    : ({
+        BLOCK: "block",
+        REDIRECT: "redirect",
+        ALLOW: "allow",
+        UPGRADE_SCHEME: "upgradeScheme",
+        MODIFY_HEADERS: "modifyHeaders",
+        ALLOW_ALL_REQUESTS: "allowAllRequests"
+      } as typeof chrome.declarativeNetRequest.RuleActionType)
+const HeaderOperation =
+  typeof chrome?.declarativeNetRequest !== "undefined"
+    ? chrome.declarativeNetRequest.HeaderOperation
+    : ({
+        APPEND: "append",
+        SET: "set",
+        REMOVE: "remove"
+      } as typeof chrome.declarativeNetRequest.HeaderOperation)
+const ResourceType =
+  typeof chrome?.declarativeNetRequest !== "undefined"
+    ? chrome.declarativeNetRequest.ResourceType
+    : ({
+        MAIN_FRAME: "main_frame",
+        SUB_FRAME: "sub_frame",
+        STYLESHEET: "stylesheet",
+        SCRIPT: "script",
+        IMAGE: "image",
+        FONT: "font",
+        OBJECT: "object",
+        XMLHTTPREQUEST: "xmlhttprequest",
+        PING: "ping",
+        CSP_REPORT: "csp_report",
+        MEDIA: "media",
+        WEBSOCKET: "websocket",
+        OTHER: "other"
+      } as typeof chrome.declarativeNetRequest.ResourceType)
+
 const typesUa = Object.keys(mapUa) as (keyof typeof mapUa)[]
+// eslint-disable-next-line functional/no-let
 let currentId = 1
 
 export function createRule(endsWith: string, referer: string) {
@@ -25,43 +66,41 @@ export function createRule(endsWith: string, referer: string) {
       id: currentId++,
       priority: 1,
       action: {
-        type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+        type: RuleActionType.MODIFY_HEADERS,
         requestHeaders: [
           {
             header: "Referer",
-            operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+            operation: HeaderOperation.SET,
             value: referer
           }
         ]
       },
       condition: {
         urlFilter: endsWith + "|",
-        resourceTypes: [
-          chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST
-        ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+        resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
       }
     },
     {
       id: currentId++,
       priority: 1,
       action: {
-        type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+        type: RuleActionType.MODIFY_HEADERS,
         requestHeaders: [
           {
             header: "Referer",
-            operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+            operation: HeaderOperation.SET,
             value: referer
           }
         ],
         responseHeaders: [
           {
             header: "Access-Control-Allow-Origin",
-            operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+            operation: HeaderOperation.SET,
             value: "*"
           },
           {
             header: "Access-Control-Allow-Methods",
-            operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+            operation: HeaderOperation.SET,
             value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
           }
         ]
@@ -69,10 +108,11 @@ export function createRule(endsWith: string, referer: string) {
       condition: {
         urlFilter: endsWith + EXTRA + "|",
         resourceTypes: [
-          chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-          chrome.declarativeNetRequest.ResourceType.IMAGE,
-          chrome.declarativeNetRequest.ResourceType.MEDIA
-        ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+          ResourceType.XMLHTTPREQUEST,
+          ResourceType.IMAGE,
+          ResourceType.MEDIA
+        ], // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+        initiatorDomains: allowlist.hosts
       }
     }
   ]
@@ -83,7 +123,7 @@ export function createRule(endsWith: string, referer: string) {
       ruleCloned.id = currentId++
       ruleCloned.action.requestHeaders?.push({
         header: "User-Agent",
-        operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+        operation: HeaderOperation.SET,
         value: mapUa[typeUa]
       })
       ruleCloned.condition.urlFilter =

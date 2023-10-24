@@ -125,9 +125,10 @@ export function execTabs<
   type: T,
   args: ArgumentsType<(typeof chrome.tabs)[T]>
 ): Promise<Awaited<ReturnType<(typeof chrome.tabs)[T]>>> {
-  // eslint-disable-next-line functional/no-throw-statement
+  // eslint-disable-next-line functional/no-throw-statements
   if (!tabsApi) throw new Error("Version extension not support tabs api.")
 
+  // eslint-disable-next-line @typescript-eslint/no-extra-parens
   return new Promise<Awaited<ReturnType<(typeof chrome.tabs)[T]>>>(
     (resolve, reject) => {
       const id = randomUUID()
@@ -158,20 +159,21 @@ export function execTabs<
   )
 }
 
-export function setReferers(referers: Record<string, string>) {
+export function setReferrers(referrers: Record<string, string>) {
   const id = randomUUID()
   return new Promise<void>((resolve) => {
     const handler = (({ detail }: CustomEvent<{ id: string }>) => {
+      detail = decodeDetail(detail)
       if (detail.id === id) {
-        document.removeEventListener("res:set:referers", handler)
+        document.removeEventListener("res:set:referrers", handler)
         resolve()
       }
     }) as EventListenerOrEventListenerObject
-    document.addEventListener("res:set:referers", handler)
+    document.addEventListener("res:set:referrers", handler)
 
     document.dispatchEvent(
-      new CustomEvent("set:referers", {
-        detail: { id, referers }
+      new CustomEvent("set:referrers", {
+        detail: { id, referrers }
       })
     )
   })

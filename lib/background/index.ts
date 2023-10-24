@@ -5,24 +5,24 @@ import { onMessage } from "@tachibana-shin/webext-bridge/background"
 import { serialize } from "cookie"
 import browser from "webextension-polyfill"
 
-import referersDefault from "../../map-referer.json"
+import referrersDefault from "../../map-referer.json"
 import { EXTRA } from "../env"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 
-import { getReferers } from "./logic/get-referers"
-import { installReferers } from "./logic/install-referer"
+import { getReferrers } from "./logic/get-referrers"
+import { installReferrers } from "./logic/install-referers"
 
 // setup install rules default
-const setup = getReferers().then((objects) =>
-  installReferers({
-    ...referersDefault,
-    ...(objects as Record<string, string>)
+const setup = getReferrers().then((referrers) =>
+  installReferrers({
+    ...referrersDefault,
+    ...(referrers as Record<string, string>)
   })
 )
 
-onMessage("set:referers", async (object) => {
+onMessage<Record<string, string>>("set:referrers", async ({ data }) => {
   await setup
-  await installReferers(object as unknown as Record<string, string>)
+  await installReferrers(data)
 })
 onMessage("get:HASH", async () => {
   await setup
@@ -141,7 +141,7 @@ async function sendRequest({
     })
     .catch((err) => {
       cancelAbort?.()
-      // eslint-disable-next-line functional/no-throw-statement
+      // eslint-disable-next-line functional/no-throw-statements
       throw err
     })
 }
