@@ -121,7 +121,7 @@ export function createRule(endsWith: string, referer: string) {
   // eslint-disable-next-line functional/no-loop-statements
   for (let i = 0, length = rules.length; i < length; i++) {
     const newRule = {
-      ...rules[i],
+      ...JSON.parse(JSON.stringify(rules[i])),
       id: currentId++
     }
     newRule.action.requestHeaders?.push({
