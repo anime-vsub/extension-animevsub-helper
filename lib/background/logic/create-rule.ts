@@ -67,13 +67,13 @@ export function createRule(endsWith: string, referer: string) {
       priority: 1,
       action: {
         type: RuleActionType.MODIFY_HEADERS,
-        requestHeaders: [
+        requestHeaders: referer ? [
           {
             header: "Referer",
             operation: HeaderOperation.SET,
             value: referer
           }
-        ]
+        ] : []
       },
       condition: {
         urlFilter: endsWith + "|",
@@ -85,13 +85,13 @@ export function createRule(endsWith: string, referer: string) {
       priority: 1,
       action: {
         type: RuleActionType.MODIFY_HEADERS,
-        requestHeaders: [
+        requestHeaders: referer ? [
           {
             header: "Referer",
             operation: HeaderOperation.SET,
             value: referer
           }
-        ],
+        ] : [],
         responseHeaders: [
           {
             header: "Access-Control-Allow-Origin",
@@ -118,23 +118,25 @@ export function createRule(endsWith: string, referer: string) {
   ]
 
   // add rules set header Origin
-  // eslint-disable-next-line functional/no-loop-statements
-  for (let i = 0, length = rules.length; i < length; i++) {
-    const newRule = {
-      ...rules[i],
-      id: currentId++
+  if (referer) {
+    // eslint-disable-next-line functional/no-loop-statements
+    for (let i = 0, length = rules.length; i < length; i++) {
+      const newRule = {
+        ...rules[i],
+        id: currentId++
+      }
+      newRule.action.requestHeaders?.push({
+        header: "Origin",
+        operation: HeaderOperation.SET,
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
+        value: new URL(referer).origin
+      })
+      newRule.condition = {
+        urlFilter: newRule.condition.urlFilter?.slice(0, -1) + "o|",
+        resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+      }
+      rules.push(newRule)
     }
-    newRule.action.requestHeaders?.push({
-      header: "Origin",
-      operation: HeaderOperation.SET,
-      // eslint-disable-next-line n/no-unsupported-features/node-builtins
-      value: new URL(referer).origin
-    })
-    newRule.condition = {
-      urlFilter: newRule.condition.urlFilter?.slice(0, -1) + "o|",
-      resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
-    }
-    rules.push(newRule)
   }
 
   rules.forEach((rule) => {
