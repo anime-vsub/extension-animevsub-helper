@@ -117,6 +117,26 @@ export function createRule(endsWith: string, referer: string) {
     }
   ]
 
+  // add rules set header Origin
+  // eslint-disable-next-line functional/no-loop-statements
+  for (let i = 0, length = rules.length; i < length; i++) {
+    const newRule = {
+      ...rules[i],
+      id: currentId++
+    }
+    newRule.action.requestHeaders?.push({
+      header: "Origin",
+      operation: HeaderOperation.SET,
+      // eslint-disable-next-line n/no-unsupported-features/node-builtins
+      value: new URL(referer).origin
+    })
+    newRule.condition = {
+      urlFilter: newRule.condition.urlFilter?.slice(0, -1) + "o|",
+      resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+    }
+    rules.push(newRule)
+  }
+
   rules.forEach((rule) => {
     typesUa.forEach((typeUa) => {
       const ruleCloned = JSON.parse(JSON.stringify(rule))
