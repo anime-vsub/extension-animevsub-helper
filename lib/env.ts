@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-undef
-export const isFirefox =
+export const isFirefox = // eslint-disable-next-line no-undef
   typeof navigator !== "undefined" && navigator?.userAgent.includes("Firefox")
 
 export const HASH = "#"
