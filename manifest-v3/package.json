@@ -1,7 +1,7 @@
 {
   "name": "animevsub-helper",
   "displayName": "AnimeVsub Helper",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "Extension add API helper for AnimeVsub",
   "private": true,
   "scripts": {
