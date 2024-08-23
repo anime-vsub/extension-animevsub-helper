@@ -17,6 +17,7 @@ export function installReferrers(referers: Record<string, string>) {
     return rules
     // eslint-disable-next-line no-undef
   }, [] as chrome.declarativeNetRequest.Rule[])
-  console.log(rules)
+  // eslint-disable-next-line no-undef
+  if (__DEV__) console.log(rules)
   return installRules(rules)
 }

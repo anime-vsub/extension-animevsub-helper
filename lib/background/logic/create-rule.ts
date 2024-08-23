@@ -59,7 +59,7 @@ const typesUa = Object.keys(mapUa) as (keyof typeof mapUa)[]
 let currentId = 1
 
 export function createRule(endsWith: string, referer: string) {
-  console.log(endsWith, referer)
+  if (__DEV__) console.log(endsWith, referer)
   // endsWith = `${HASH}${endsWith}`
   const rules: chrome.declarativeNetRequest.Rule[] = [
     {
@@ -151,6 +151,77 @@ export function createRule(endsWith: string, referer: string) {
 
       rules.push(ruleCloned)
     })
+  })
+
+  rules.push({
+    id: currentId++,
+    priority: 1,
+    action: {
+      type: RuleActionType.MODIFY_HEADERS,
+      requestHeaders: [
+        {
+          header: "Accept-Encoding",
+          operation: HeaderOperation.SET,
+          value: "gzip, deflate, br, zstd"
+        },
+        {
+          header: "Origin",
+          operation: HeaderOperation.REMOVE
+        },
+        {
+          header: "Priority",
+          operation: HeaderOperation.SET,
+          value: "i"
+        },
+        {
+          header: "Referer",
+          operation: HeaderOperation.SET,
+          value: "https://lh3.googleusercontent.com/"
+        },
+        {
+          header: "Sec-Fetch-Dest",
+          operation: HeaderOperation.SET,
+          value: "image"
+        },
+        {
+          header: "Sec-Fetch-Mode",
+          operation: HeaderOperation.SET,
+          value: "no-cors"
+        },
+        {
+          header: "Sec-Fetch-Site",
+          operation: HeaderOperation.SET,
+          value: "cross-site"
+        },
+        {
+          header: "Sec-Gpc",
+          operation: HeaderOperation.SET,
+          value: "1"
+        }
+      ],
+      responseHeaders: [
+        {
+          header: "Access-Control-Allow-Origin",
+          operation: HeaderOperation.SET,
+          value: "*"
+        },
+        {
+          header: "Access-Control-Allow-Methods",
+          operation: HeaderOperation.SET,
+          value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+        }
+      ]
+    },
+    condition: {
+      // urlFilter: endsWith + GA + "|",
+      regexFilter: "^https?://([a-zA-Z0-9-]+\\.)?googleusercontent\\.[a-zA-Z]{2,}(/|$)",
+      resourceTypes: [
+        ResourceType.XMLHTTPREQUEST,
+        ResourceType.IMAGE,
+        ResourceType.MEDIA
+      ], // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+      initiatorDomains: allowlist.hosts
+    }
   })
 
   return rules
