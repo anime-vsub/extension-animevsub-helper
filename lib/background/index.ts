@@ -13,12 +13,12 @@ import { getReferrers } from "./logic/get-referrers"
 import { installReferrers } from "./logic/install-referers"
 
 // setup install rules default
-const setup = getReferrers().then((referrers) =>
-  installReferrers({
-    ...referrersDefault,
-    ...(referrers as Record<string, string>)
-  })
-)
+const setup = Promise.all([
+  installReferrers(referrersDefault),
+  getReferrers().then((referrers) =>
+    installReferrers(referrers as Record<string, string>)
+  )
+])
 
 onMessage<Record<string, string>>("set:referrers", async ({ data }) => {
   await setup
