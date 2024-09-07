@@ -3,6 +3,8 @@
 [![GitHub license](https://img.shields.io/github/license/anime-vsub/extension-animevsub-helper)](https://github.com/anime-vsub/extension-animevsub-helper/blob/main/LICENSE) 
 ![Release](https://img.shields.io/github/package-json/v/anime-vsub/extension-animevsub-helper?color=b)
 
+> [!IMPORTANT]
+> 
 > Extension is helper for animevsub [dekstop website](https://github.com/anime-vsub/desktop-web).
 > *The web version of the app won't work without this extension*
 
@@ -24,6 +26,8 @@ Install for
 - If someone wants to upload this utility to the `Chrome Store` just do so you don't have to get permission from anyone. But then send a pull request that includes a link to the utility and your name to this repo to share it with everyone.
 
 ## Inject window.Http
+> [!CAUTION]
+> 
 > Since stable version `1.0.1` utility will not inject code anymore use npm package [client-ext-animevsub-helper](https://npmjs.org/package/client-ext-animevsub-helper) replaceable
 
 ~~Here is the API that this extension embeds in websites [Check here](./lib/contentScripts/inject.ts)~~
