@@ -150,7 +150,7 @@ export function createRule(endsWith: string, referer: string) {
         operation: HeaderOperation.REMOVE
       })
       newRule2.condition.urlFilter =
-        neweRule2.condition.urlFilter.slice(0, -1) + "ro|"
+        newRule2.condition.urlFilter.slice(0, -1) + "ro|"
       rules.push(newRule2)
     }
   }
