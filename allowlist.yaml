@@ -20,3 +20,8 @@ hosts:
 
   - ihentai.netlify.app
   - ihentai.eu.org
+  
+  - cinevsub.netlify.app
+  - cinevsub.eu.org
+  - cinevsub.pages.dev
+  - cinevsub.nuxt.dev
