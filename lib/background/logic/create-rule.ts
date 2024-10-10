@@ -137,6 +137,17 @@ export function createRule(endsWith: string, referer: string) {
       resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
     }
     rules.push(newRule)
+
+    const newRule2 = {
+      ...JSON.parse(JSON.stringify(rules[i])),
+      id: currentId++
+    }
+    newRule2.action.requestHeaders!.push({
+      header: "Origin",
+      operation: HeaderOperation.REMOVE
+    })
+    newRule.condition.urlFilter = neweRule.condition.urlFilter.slice(0, -1) + "ro|"
+    rules.push(newRule2)
   }
 
   rules.forEach((rule) => {
