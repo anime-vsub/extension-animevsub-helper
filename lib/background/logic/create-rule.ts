@@ -122,32 +122,37 @@ export function createRule(endsWith: string, referer: string) {
   // add rules set header Origin
   // eslint-disable-next-line functional/no-loop-statements
   for (let i = 0, length = rules.length; i < length; i++) {
-    const newRule = {
-      ...JSON.parse(JSON.stringify(rules[i])),
-      id: currentId++
+    {
+      const newRule = {
+        ...JSON.parse(JSON.stringify(rules[i])),
+        id: currentId++
+      }
+      newRule.action.requestHeaders?.push({
+        header: "Origin",
+        operation: HeaderOperation.SET,
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
+        value: referer ? new URL(referer).origin : ""
+      })
+      newRule.condition = {
+        urlFilter: newRule.condition.urlFilter?.slice(0, -1) + "o|",
+        resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
+      }
+      rules.push(newRule)
     }
-    newRule.action.requestHeaders?.push({
-      header: "Origin",
-      operation: HeaderOperation.SET,
-      // eslint-disable-next-line n/no-unsupported-features/node-builtins
-      value: referer ? new URL(referer).origin : ""
-    })
-    newRule.condition = {
-      urlFilter: newRule.condition.urlFilter?.slice(0, -1) + "o|",
-      resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
-    }
-    rules.push(newRule)
 
-    const newRule2 = {
-      ...JSON.parse(JSON.stringify(rules[i])),
-      id: currentId++
+    {
+      const newRule2 = {
+        ...JSON.parse(JSON.stringify(rules[i])),
+        id: currentId++
+      }
+      newRule2.action.requestHeaders!.push({
+        header: "Origin",
+        operation: HeaderOperation.REMOVE
+      })
+      newRule2.condition.urlFilter =
+        neweRule2.condition.urlFilter.slice(0, -1) + "ro|"
+      rules.push(newRule2)
     }
-    newRule2.action.requestHeaders!.push({
-      header: "Origin",
-      operation: HeaderOperation.REMOVE
-    })
-    newRule.condition.urlFilter = neweRule.condition.urlFilter.slice(0, -1) + "ro|"
-    rules.push(newRule2)
   }
 
   rules.forEach((rule) => {
