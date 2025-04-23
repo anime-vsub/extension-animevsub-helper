@@ -1,5 +1,5 @@
 {
-  "version": "1.0.40",
+  "version": "1.0.41",
   "scripts": {
     "lint": "eslint lib/ --ext ts",
     "format": "prettier -w lib/",
@@ -30,5 +30,8 @@
     "typescript": "^5.2.2",
     "vite": "4.5.0",
     "vitest": "^0.34.6"
+  },
+  "dependencies": {
+    "bumpp": "^10.1.0"
   }
 }
