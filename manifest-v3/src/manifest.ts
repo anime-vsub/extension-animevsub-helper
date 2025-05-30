@@ -23,7 +23,13 @@ export async function getManifest() {
       48: "./assets/icon-512.png",
       128: "./assets/icon-512.png"
     },
-    permissions: ["activeTab", "scripting", "cookies", "declarativeNetRequest", "storage"],
+    permissions: [
+      "activeTab",
+      "scripting",
+      "cookies",
+      "declarativeNetRequest",
+      "storage"
+    ],
     host_permissions: ["*://*/*"],
     content_scripts: [
       {
@@ -35,6 +41,18 @@ export async function getManifest() {
         all_frames: true,
         run_at: "document_start",
         js: ["./dist/contentScripts/index.global.js"]
+      },
+      {
+        matches: ["<all_urls>"],
+        all_frames: true,
+        run_at: "document_start",
+        js: ["./dist/contentScripts/inject.global.js"]
+      }
+    ],
+    web_accessible_resources: [
+      {
+        resources: ["dist/contentScripts/inject2.global.js"],
+        matches: ["<all_urls>"]
       }
     ],
     content_security_policy: {
