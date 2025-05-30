@@ -11,7 +11,7 @@
     "dev:inject": "npm run build:inject -- --mode development",
     "dev:inject2": "npm run build:inject2 -- --mode development",
     "dev:bg": "tsup --watch ./src",
-    "build": "cross-env NODE_ENV=production run-s clear build:prepare build:js build:inject build:injecte2 build:bg",
+    "build": "cross-env NODE_ENV=production run-s clear build:prepare build:js build:inject build:inject2 build:bg",
     "build:prepare": "tsx scripts/prepare.ts",
     "build:js": "vite build --config vite.config.content.ts",
     "build:inject": "vite build --config vite.config.content-inject.ts",
