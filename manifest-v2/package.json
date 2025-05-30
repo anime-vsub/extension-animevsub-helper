@@ -17,7 +17,7 @@
     "build:web": "vite build",
     "build:js": "vite build --config vite.config.content.ts",
     "build:inject": "vite build --config vite.config.content-inject.ts",
-    "build:inject2": "vite build --config vite.config.content2-inject.ts",
+    "build:inject2": "vite build --config vite.config.content-inject2.ts",
     "pack": "cross-env NODE_ENV=production run-p pack:*",
     "pack:zip": "rimraf mv2-extension.zip && jszip-cli add extension/* -o ./mv2-extension.zip",
     "pack:crx": "crx pack extension -o ./mv2-extension.crx",
