@@ -58,10 +58,7 @@ export async function getManifest() {
       }
     ],
     web_accessible_resources: [
-      {
-        resources: ["dist/contentScripts/inject2.global.js"],
-        matches: ["<all_urls>"]
-      }
+      "dist/contentScripts/inject2.global.js"
     ]
   }
 
