@@ -11,10 +11,12 @@ import { injectMainWorldWorkerPatch } from "../logic/patchWorker"
 import type { RequestOption, RequestResponse } from "../types"
 export type { DetailCustomEvent_sendToInject } from "../types"
 
-// Patch window.btoa in the page's main world to support UTF-8 characters without InvalidCharacterError
-injectMainWorldBtoaPatch()
-// Patch window.Worker in the page's main world to support download worker HLS parsing and stream headers
-injectMainWorldWorkerPatch()
+// For MV2 (Firefox): inject patches via inline <script> tags since world: "MAIN" is not available
+// For MV3 (Chrome): patches are injected via manifest content_scripts with world: "MAIN" to bypass CSP
+if (!__MV3__) {
+  injectMainWorldBtoaPatch()
+  injectMainWorldWorkerPatch()
+}
 
 document.addEventListener("http:request", (async ({
   detail

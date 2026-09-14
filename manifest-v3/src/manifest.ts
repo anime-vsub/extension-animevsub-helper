@@ -47,6 +47,18 @@ export async function getManifest() {
         all_frames: true,
         run_at: "document_start",
         js: ["./dist/contentScripts/inject.global.js"]
+      },
+      {
+        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8"))
+          .hosts.map((host) => {
+            return [`http://${host}/*`, `https://${host}/*`]
+          })
+          .flat(1),
+        all_frames: true,
+        run_at: "document_start",
+        js: ["./dist/contentScripts/mainworld.global.js"],
+        // @ts-expect-error: world is a valid MV3 property not in webextension-polyfill types
+        world: "MAIN"
       }
     ],
     web_accessible_resources: [
