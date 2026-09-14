@@ -19,9 +19,9 @@ export async function getManifest() {
       service_worker: "./dist/background/index.mjs"
     },
     icons: {
-      16: "./assets/icon-512.png",
-      48: "./assets/icon-512.png",
-      128: "./assets/icon-512.png"
+      16: "./assets/icon-16.png",
+      48: "./assets/icon-48.png",
+      128: "./assets/icon-128.png"
     },
     permissions: [
       "activeTab",

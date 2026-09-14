@@ -3,17 +3,11 @@
 import { sendMessage } from "@tachibana-shin/webext-bridge/content-script"
 
 import { version } from "../../package.json"
-import type { RequestOption, RequestResponse } from "../background"
 import { isFirefox } from "../env"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { encodeDetail } from "../logic/encoder-detail"
-
-export interface DetailCustomEvent_sendToInject {
-  id: string
-  isBuffer?: boolean
-  ok: boolean
-  res: RequestResponse
-}
+import type { RequestOption, RequestResponse } from "../types"
+export type { DetailCustomEvent_sendToInject } from "../types"
 
 document.addEventListener("http:request", (async ({
   detail
@@ -116,3 +110,112 @@ document.documentElement.dataset.httpVersion = version
 document.documentElement.dataset.httpAllow = JSON.stringify(true)
 document.documentElement.dataset.tabsApi = JSON.stringify(true)
 document.documentElement.dataset.customReferer = JSON.stringify(true)
+
+function fixLegacyUrls(root: ParentNode = document) {
+  try {
+    root
+      .querySelectorAll<HTMLImageElement | HTMLSourceElement>(
+        'img[src*="animevietsub."], source[src*="animevietsub."]'
+      )
+      .forEach((el) => {
+        if (el.src) {
+          const newSrc = el.src
+            .replace(
+              /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+              "cdn.animevietsub.zip"
+            )
+            .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+          if (newSrc !== el.src) el.src = newSrc
+        }
+      })
+    root
+      .querySelectorAll<HTMLAnchorElement>('a[href*="animevietsub.pl"]')
+      .forEach((el) => {
+        if (el.href) {
+          const newHref = el.href.replace(
+            /:\/\/animevietsub\.pl/gi,
+            "://animevietsub.zip"
+          )
+          if (newHref !== el.href) el.href = newHref
+        }
+      })
+  } catch {
+    // ignore
+  }
+}
+
+window.addEventListener(
+  "error",
+  (event) => {
+    const target = event.target as HTMLElement | null
+    if (!target) return
+    if (
+      target instanceof HTMLImageElement ||
+      target instanceof HTMLSourceElement
+    ) {
+      if (
+        target.src &&
+        (target.src.includes("cdn.animevietsub.") ||
+          target.src.includes("://animevietsub.pl"))
+      ) {
+        const newSrc = target.src
+          .replace(
+            /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+            "cdn.animevietsub.zip"
+          )
+          .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+        if (newSrc !== target.src) target.src = newSrc
+      }
+    }
+  },
+  true
+)
+
+if (typeof document !== "undefined") {
+  const initObserver = () => {
+    fixLegacyUrls()
+    const targetNode = document.body || document.documentElement
+    if (targetNode) {
+      new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === "childList") {
+            for (const node of mutation.addedNodes) {
+              if (node.nodeType === 1) fixLegacyUrls(node as ParentNode)
+            }
+          } else if (mutation.type === "attributes") {
+            const el = mutation.target as HTMLElement
+            if (
+              el instanceof HTMLImageElement &&
+              mutation.attributeName === "src" &&
+              el.src
+            ) {
+              if (
+                el.src.includes("cdn.animevietsub.") ||
+                el.src.includes("://animevietsub.pl")
+              ) {
+                const newSrc = el.src
+                  .replace(
+                    /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+                    "cdn.animevietsub.zip"
+                  )
+                  .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+                if (newSrc !== el.src) el.src = newSrc
+              }
+            }
+          }
+        }
+      }).observe(targetNode, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["src"]
+      })
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initObserver)
+  } else {
+    initObserver()
+  }
+}

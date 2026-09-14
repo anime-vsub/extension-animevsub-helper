@@ -3,3 +3,8 @@ packages:
   - manifest-v3
   - lib
   - npm
+allowBuilds:
+  core-js: true
+  dtrace-provider: true
+  esbuild: true
+  spawn-sync: true

@@ -2,6 +2,16 @@
 import allowlist from "../../../allowlist.yaml"
 import { EXTRA } from "../../env"
 
+const allowedDomains: string[] = Array.from(
+  new Set(
+    (allowlist.hosts as string[])
+      .map((host) => {
+        return host.replace(/^https?:\/\//, "").split("/")[0].split(":")[0].trim()
+      })
+      .filter(Boolean)
+  )
+)
+
 const mapUa = {
   firefox:
     "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
@@ -114,7 +124,7 @@ export function createRule(endsWith: string, referer: string) {
           ResourceType.IMAGE,
           ResourceType.MEDIA
         ], // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
-        initiatorDomains: allowlist.hosts
+        initiatorDomains: allowedDomains
       }
     }
   ]
@@ -241,7 +251,7 @@ export function createRule(endsWith: string, referer: string) {
             ResourceType.IMAGE,
             ResourceType.MEDIA
           ], // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
-          initiatorDomains: allowlist.hosts
+          initiatorDomains: allowedDomains
         }
       },
       {
@@ -291,7 +301,69 @@ export function createRule(endsWith: string, referer: string) {
             ResourceType.IMAGE,
             ResourceType.MEDIA
           ], // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
-          initiatorDomains: allowlist.hosts
+          initiatorDomains: allowedDomains
+        }
+      },
+      {
+        id: currentId++,
+        priority: 1000,
+        action: {
+          type: RuleActionType.REDIRECT,
+          redirect: {
+            transform: {
+              scheme: "https",
+              host: "cdn.animevietsub.zip"
+            }
+          }
+        },
+        condition: {
+          regexFilter: "^https?://cdn\\.animevietsub\\.(?:pl|id|tv|net)",
+          resourceTypes: [
+            ResourceType.MAIN_FRAME,
+            ResourceType.SUB_FRAME,
+            ResourceType.STYLESHEET,
+            ResourceType.SCRIPT,
+            ResourceType.IMAGE,
+            ResourceType.FONT,
+            ResourceType.OBJECT,
+            ResourceType.XMLHTTPREQUEST,
+            ResourceType.PING,
+            ResourceType.CSP_REPORT,
+            ResourceType.MEDIA,
+            ResourceType.WEBSOCKET,
+            ResourceType.OTHER
+          ]
+        }
+      },
+      {
+        id: currentId++,
+        priority: 1000,
+        action: {
+          type: RuleActionType.REDIRECT,
+          redirect: {
+            transform: {
+              scheme: "https",
+              host: "animevietsub.zip"
+            }
+          }
+        },
+        condition: {
+          regexFilter: "^https?://animevietsub\\.pl",
+          resourceTypes: [
+            ResourceType.MAIN_FRAME,
+            ResourceType.SUB_FRAME,
+            ResourceType.STYLESHEET,
+            ResourceType.SCRIPT,
+            ResourceType.IMAGE,
+            ResourceType.FONT,
+            ResourceType.OBJECT,
+            ResourceType.XMLHTTPREQUEST,
+            ResourceType.PING,
+            ResourceType.CSP_REPORT,
+            ResourceType.MEDIA,
+            ResourceType.WEBSOCKET,
+            ResourceType.OTHER
+          ]
         }
       }
     )

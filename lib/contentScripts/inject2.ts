@@ -10,12 +10,14 @@
 /// <reference lib="dom" />
 
 import { version } from "../../package.json"
-import type { RequestOption, RequestResponse } from "../background"
 import { isFirefox } from "../env"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 import { encodeDetail } from "../logic/encoder-detail"
-
-import type { DetailCustomEvent_sendToInject } from "."
+import type {
+  DetailCustomEvent_sendToInject,
+  RequestOption,
+  RequestResponse
+} from "../types"
 
 function patchWorker() {
   const OriginWorker = window.Worker
@@ -242,10 +244,17 @@ function patchAnimeVsubHelper() {
       }
     }
 
+    const targetUrl = detail.req.url
+      .replace(
+        /^https?:\/\/cdn\.animevietsub\.[^/]+/i,
+        "https://cdn.animevietsub.zip"
+      )
+      .replace(/^https?:\/\/animevietsub\.[^/]+/i, "https://animevietsub.zip")
+
     document.dispatchEvent(
       new CustomEvent<DetailCustomEvent_sendToInject>("http:response", {
         detail: encodeDetail(
-          await fetch(detail.req.url, { ...detail.req, body: form, signal })
+          await fetch(targetUrl, { ...detail.req, body: form, signal })
             .then(async (res): Promise<DetailCustomEvent_sendToInject> => {
               const output: RequestResponse = {
                 headers: Object.fromEntries(
@@ -262,11 +271,26 @@ function patchAnimeVsubHelper() {
                     ? await res.text()
                     : arrayBufferToBase64(await res.arrayBuffer())
                   break
-                case "json":
-                  output.data = await res.json()
+                case "json": {
+                  const text = await res.text()
+                  const cleaned = text
+                    .replace(
+                      /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+                      "cdn.animevietsub.zip"
+                    )
+                    .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+                  output.data = JSON.parse(cleaned)
                   break
-                default:
-                  output.data = await res.text()
+                }
+                default: {
+                  const text = await res.text()
+                  output.data = text
+                    .replace(
+                      /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+                      "cdn.animevietsub.zip"
+                    )
+                    .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+                }
               }
 
               return {

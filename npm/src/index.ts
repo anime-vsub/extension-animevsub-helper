@@ -2,8 +2,11 @@
 /* eslint-disable no-undef */
 import type { ArgumentsType } from "vitest"
 
-import type { RequestOption, RequestResponse } from "../../lib/background"
-import type { DetailCustomEvent_sendToInject } from "../../lib/contentScripts"
+import type {
+  DetailCustomEvent_sendToInject,
+  RequestOption,
+  RequestResponse
+} from "../../lib/types"
 import { base64ToArrayBuffer } from "../../lib/logic/base64ToArrayBuffer"
 import { decodeDetail } from "../../lib/logic/encoder-detail"
 import { randomUUID } from "../../lib/logic/randomUUID"

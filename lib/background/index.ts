@@ -13,12 +13,17 @@ import { getReferrers } from "./logic/get-referrers"
 import { installReferrers } from "./logic/install-referers"
 
 // setup install rules default
-const setup = Promise.all([
-  installReferrers(referrersDefault),
-  getReferrers().then((referrers) =>
-    installReferrers(referrers as Record<string, string>)
-  )
-])
+async function initRules() {
+  try {
+    const referrersCustom = (await getReferrers()) as Record<string, string>
+    return await installReferrers({ ...referrersDefault, ...referrersCustom })
+  } catch (e) {
+    console.error("[AnimeVsub Helper] Error initializing rules:", e)
+    return await installReferrers(referrersDefault)
+  }
+}
+
+const setup = initRules()
 
 onMessage<Record<string, string>>("set:referrers", async ({ data }) => {
   await setup
@@ -29,30 +34,7 @@ onMessage("get:HASH", async () => {
   return EXTRA
 })
 
-export interface RequestResponse {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  headers: Record<string, any>
-  data: string | ArrayBuffer
-  url: string
-  status: number
-}
-
-export type RequestOption = Pick<
-  RequestInit,
-  | "method"
-  | "cache"
-  | "integrity"
-  | "keepalive"
-  | "redirect"
-  | "referrerPolicy"
-  | "window"
-> & {
-  url: string
-  headers?: Record<string, string>
-  responseType?: "arraybuffer" | "json" | "text"
-  signalId?: string | true
-  data?: Record<string, number | string | boolean> | string
-}
+export type { RequestOption, RequestResponse } from "../types"
 
 // eslint-disable-next-line functional/no-classes
 const eventsAbort = new (class EventsAbort {
@@ -118,6 +100,11 @@ async function sendRequest({
 
   await setup
 
+  // Redirect legacy/blocked animevietsub domains (such as cdn.animevietsub.pl, animevietsub.pl) to .zip
+  url = url
+    .replace(/^https?:\/\/cdn\.animevietsub\.[^/]+/i, "https://cdn.animevietsub.zip")
+    .replace(/^https?:\/\/animevietsub\.[^/]+/i, "https://animevietsub.zip")
+
   if (headers?.["c-cookie"]) await setCookie(url, headers["c-cookie"])
 
   return fetch(url, {
@@ -130,19 +117,29 @@ async function sendRequest({
     .then(async (res) => {
       cancelAbort?.()
 
+      const rawData =
+        responseType === "arraybuffer"
+          ? // eslint-disable-next-line promise/no-nesting
+            await res.arrayBuffer().then(arrayBufferToBase64)
+          : await res.text()
+
+      const data =
+        typeof rawData === "string"
+          ? rawData
+              .replace(/cdn\.animevietsub\.(?:pl|id|tv|net)/gi, "cdn.animevietsub.zip")
+              .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+          : rawData
+
       return {
         headers: await mergeSetCookie(res.headers, res.url),
-        data:
-          responseType === "arraybuffer"
-            ? // eslint-disable-next-line promise/no-nesting
-            await res.arrayBuffer().then(arrayBufferToBase64)
-            : await res.text(),
+        data,
         url: res.url,
         status: res.status
       }
     })
     .catch((err) => {
       cancelAbort?.()
+      console.error(`[AnimeVsub Helper] Fetch error for ${url}:`, err)
       // eslint-disable-next-line functional/no-throw-statements
       throw err
     })
