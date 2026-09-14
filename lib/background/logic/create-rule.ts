@@ -102,7 +102,17 @@ export function createRule(endsWith: string, referer: string) {
             header: "Referer",
             operation: HeaderOperation.SET,
             value: referer
-          }
+          },
+          ...(referer
+            ? [
+                {
+                  header: "Origin",
+                  operation: HeaderOperation.SET,
+                  // eslint-disable-next-line n/no-unsupported-features/node-builtins
+                  value: new URL(referer).origin
+                }
+              ]
+            : [])
         ],
         responseHeaders: [
           {
@@ -114,6 +124,16 @@ export function createRule(endsWith: string, referer: string) {
             header: "Access-Control-Allow-Methods",
             operation: HeaderOperation.SET,
             value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+          },
+          {
+            header: "Access-Control-Allow-Headers",
+            operation: HeaderOperation.SET,
+            value: "*"
+          },
+          {
+            header: "Access-Control-Expose-Headers",
+            operation: HeaderOperation.SET,
+            value: "*"
           }
         ]
       },
@@ -122,9 +142,9 @@ export function createRule(endsWith: string, referer: string) {
         resourceTypes: [
           ResourceType.XMLHTTPREQUEST,
           ResourceType.IMAGE,
-          ResourceType.MEDIA
-        ], // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
-        initiatorDomains: allowedDomains
+          ResourceType.MEDIA,
+          ResourceType.OTHER
+        ] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
       }
     }
   ]
@@ -137,12 +157,19 @@ export function createRule(endsWith: string, referer: string) {
         ...JSON.parse(JSON.stringify(rules[i])),
         id: currentId++
       }
-      newRule.action.requestHeaders?.push({
-        header: "Origin",
-        operation: HeaderOperation.SET,
-        // eslint-disable-next-line n/no-unsupported-features/node-builtins
-        value: referer ? new URL(referer).origin : ""
-      })
+      if (
+        !newRule.action.requestHeaders.some(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (h: any) => h.header.toLowerCase() === "origin"
+        )
+      ) {
+        newRule.action.requestHeaders?.push({
+          header: "Origin",
+          operation: HeaderOperation.SET,
+          // eslint-disable-next-line n/no-unsupported-features/node-builtins
+          value: referer ? new URL(referer).origin : ""
+        })
+      }
       newRule.condition = {
         urlFilter: newRule.condition.urlFilter?.slice(0, -1) + "o|",
         resourceTypes: [ResourceType.XMLHTTPREQUEST] // see available https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#type-ResourceType
@@ -155,7 +182,13 @@ export function createRule(endsWith: string, referer: string) {
         ...JSON.parse(JSON.stringify(rules[i])),
         id: currentId++
       }
-      newRule2.action.requestHeaders!.push({
+      newRule2.action.requestHeaders =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        newRule2.action.requestHeaders.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (h: any) => h.header.toLowerCase() !== "origin"
+        )
+      newRule2.action.requestHeaders.push({
         header: "Origin",
         operation: HeaderOperation.REMOVE
       })
@@ -363,6 +396,58 @@ export function createRule(endsWith: string, referer: string) {
             ResourceType.MEDIA,
             ResourceType.WEBSOCKET,
             ResourceType.OTHER
+          ]
+        }
+      },
+      {
+        id: currentId++,
+        priority: 2000,
+        action: {
+          type: RuleActionType.MODIFY_HEADERS,
+          requestHeaders: [
+            {
+              header: "Referer",
+              operation: HeaderOperation.SET,
+              value: "https://animevietsub.id/"
+            },
+            {
+              header: "Origin",
+              operation: HeaderOperation.SET,
+              value: "https://animevietsub.id"
+            }
+          ],
+          responseHeaders: [
+            {
+              header: "Access-Control-Allow-Origin",
+              operation: HeaderOperation.SET,
+              value: "*"
+            },
+            {
+              header: "Access-Control-Allow-Methods",
+              operation: HeaderOperation.SET,
+              value: "PUT, GET, HEAD, POST, DELETE, OPTIONS"
+            },
+            {
+              header: "Access-Control-Allow-Headers",
+              operation: HeaderOperation.SET,
+              value: "*"
+            },
+            {
+              header: "Access-Control-Expose-Headers",
+              operation: HeaderOperation.SET,
+              value: "*"
+            }
+          ]
+        },
+        condition: {
+          regexFilter: "^https?://([a-zA-Z0-9-]+\\.)?googleapiscdn\\.com",
+          resourceTypes: [
+            ResourceType.MAIN_FRAME,
+            ResourceType.SUB_FRAME,
+            ResourceType.XMLHTTPREQUEST,
+            ResourceType.MEDIA,
+            ResourceType.OTHER,
+            ResourceType.IMAGE
           ]
         }
       }

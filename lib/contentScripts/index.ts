@@ -7,11 +7,14 @@ import { isFirefox } from "../env"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { encodeDetail } from "../logic/encoder-detail"
 import { injectMainWorldBtoaPatch } from "../logic/patchBtoa"
+import { injectMainWorldWorkerPatch } from "../logic/patchWorker"
 import type { RequestOption, RequestResponse } from "../types"
 export type { DetailCustomEvent_sendToInject } from "../types"
 
 // Patch window.btoa in the page's main world to support UTF-8 characters without InvalidCharacterError
 injectMainWorldBtoaPatch()
+// Patch window.Worker in the page's main world to support download worker HLS parsing and stream headers
+injectMainWorldWorkerPatch()
 
 document.addEventListener("http:request", (async ({
   detail
