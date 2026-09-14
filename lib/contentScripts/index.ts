@@ -6,8 +6,12 @@ import { version } from "../../package.json"
 import { isFirefox } from "../env"
 import { base64ToArrayBuffer } from "../logic/base64ToArrayBuffer"
 import { encodeDetail } from "../logic/encoder-detail"
+import { injectMainWorldBtoaPatch } from "../logic/patchBtoa"
 import type { RequestOption, RequestResponse } from "../types"
 export type { DetailCustomEvent_sendToInject } from "../types"
+
+// Patch window.btoa in the page's main world to support UTF-8 characters without InvalidCharacterError
+injectMainWorldBtoaPatch()
 
 document.addEventListener("http:request", (async ({
   detail

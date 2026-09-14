@@ -13,11 +13,15 @@ import { version } from "../../package.json"
 import { isFirefox } from "../env"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 import { encodeDetail } from "../logic/encoder-detail"
+import { patchBtoa, patchBtoaCode } from "../logic/patchBtoa"
 import type {
   DetailCustomEvent_sendToInject,
   RequestOption,
   RequestResponse
 } from "../types"
+
+// Apply btoa patch in main world immediately
+patchBtoa()
 
 function patchWorker() {
   const OriginWorker = window.Worker
@@ -48,7 +52,10 @@ function patchWorker() {
         if (!res.ok) throw new Error(`Failed to fetch worker: ${res.status}`)
 
         const script = await res.text()
-        const blob = new Blob([script], { type: "application/javascript" })
+        const patchedScript = `${patchBtoaCode};\n${script}`
+        const blob = new Blob([patchedScript], {
+          type: "application/javascript"
+        })
         const objectURL = URL.createObjectURL(blob)
 
         const real = new OriginWorker(objectURL, {
