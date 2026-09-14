@@ -19,9 +19,9 @@ export async function getManifest() {
       service_worker: "./dist/background/index.mjs"
     },
     icons: {
-      16: "./assets/icon-512.png",
-      48: "./assets/icon-512.png",
-      128: "./assets/icon-512.png"
+      16: "./assets/icon-16.png",
+      48: "./assets/icon-48.png",
+      128: "./assets/icon-128.png"
     },
     permissions: [
       "activeTab",
@@ -47,6 +47,18 @@ export async function getManifest() {
         all_frames: true,
         run_at: "document_start",
         js: ["./dist/contentScripts/inject.global.js"]
+      },
+      {
+        matches: Yaml.parse(await fs.readFile(r("../allowlist.yaml"), "utf8"))
+          .hosts.map((host) => {
+            return [`http://${host}/*`, `https://${host}/*`]
+          })
+          .flat(1),
+        all_frames: true,
+        run_at: "document_start",
+        js: ["./dist/contentScripts/mainworld.global.js"],
+        // @ts-expect-error: world is a valid MV3 property not in webextension-polyfill types
+        world: "MAIN"
       }
     ],
     web_accessible_resources: [

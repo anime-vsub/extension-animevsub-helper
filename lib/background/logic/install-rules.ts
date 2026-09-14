@@ -13,30 +13,42 @@ const ResourceType = {
 } as const
 export async function installRules(rules: chrome.declarativeNetRequest.Rule[]) {
   if (__MV3__) {
-    const ruleIds = rules.map((item) => item.id)
-
-    const uninstall = () =>
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: ruleIds
+    try {
+      const existingRules = await chrome.declarativeNetRequest.getDynamicRules()
+      const existingRuleIds = existingRules.map((item) => item.id)
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: existingRuleIds,
+        addRules: rules
       })
-    await uninstall()
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: rules
-    })
+    } catch (e) {
+      console.error("[AnimeVsub Helper] Failed to update dynamic rules:", e)
+    }
 
+    const uninstall = async () => {
+      try {
+        const ruleIds = rules.map((item) => item.id)
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          removeRuleIds: ruleIds
+        })
+      } catch (e) {
+        console.error("[AnimeVsub Helper] Failed to remove dynamic rules:", e)
+      }
+    }
     return uninstall
   } else {
     rules.forEach((rule) => {
+      if (!rule.condition.urlFilter) return
       // eslint-disable-next-line functional/no-let
-      let rules = storeRulesMV2.get(rule.condition.urlFilter!)
-      if (!rules) storeRulesMV2.set(rule.condition.urlFilter!, (rules = []))
+      let rules = storeRulesMV2.get(rule.condition.urlFilter)
+      if (!rules) storeRulesMV2.set(rule.condition.urlFilter, (rules = []))
 
       rules.push(rule)
     })
 
     const uninstall = () => {
       rules.forEach((rule) => {
-        const rules = storeRulesMV2.get(rule.condition.urlFilter!)
+        if (!rule.condition.urlFilter) return
+        const rules = storeRulesMV2.get(rule.condition.urlFilter)
         if (rules) rules.splice(rules.indexOf(rule) >>> 0, 1)
       })
     }
@@ -120,5 +132,26 @@ function registerMV2() {
       "blocking"
       // "extraHeaders"
     ]
+  )
+
+  browser.webRequest.onBeforeRequest.addListener(
+    (details) => {
+      if (details.url.includes("cdn.animevietsub.")) {
+        const redirectUrl = details.url.replace(
+          /cdn\.animevietsub\.(?:pl|id|tv|net)/i,
+          "cdn.animevietsub.zip"
+        )
+        if (redirectUrl !== details.url) return { redirectUrl }
+      }
+      if (details.url.includes("://animevietsub.pl")) {
+        const redirectUrl = details.url.replace(
+          /:\/\/animevietsub\.pl/i,
+          "://animevietsub.zip"
+        )
+        if (redirectUrl !== details.url) return { redirectUrl }
+      }
+    },
+    { urls: ["*://*.animevietsub.pl/*", "*://cdn.animevietsub.*/*"] },
+    ["blocking"]
   )
 }

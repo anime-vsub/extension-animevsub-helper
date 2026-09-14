@@ -10,180 +10,19 @@
 /// <reference lib="dom" />
 
 import { version } from "../../package.json"
-import type { RequestOption, RequestResponse } from "../background"
 import { isFirefox } from "../env"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 import { encodeDetail } from "../logic/encoder-detail"
+import { patchBtoa } from "../logic/patchBtoa"
+import { patchWorker } from "../logic/patchWorker"
+import type {
+  DetailCustomEvent_sendToInject,
+  RequestOption,
+  RequestResponse
+} from "../types"
 
-import type { DetailCustomEvent_sendToInject } from "."
-
-function patchWorker() {
-  const OriginWorker = window.Worker
-
-  class CORSWorker implements Worker {
-    private realWorker: Worker | null = null
-    private queue: Array<{ method: string; args: any[] }> = []
-
-    private listeners: Map<string, Set<EventListenerOrEventListenerObject>> =
-      new Map()
-
-    private _onmessage: ((this: Worker, ev: MessageEvent) => any) | null = null
-    private _onerror: ((this: AbstractWorker, ev: ErrorEvent) => any) | null =
-      null
-
-    private _onmessageerror: ((this: Worker, ev: MessageEvent) => any) | null =
-      null
-
-    constructor(url: string, options?: WorkerOptions) {
-      this.init(url, options)
-    }
-
-    private async init(url: string, options?: WorkerOptions) {
-      try {
-        const urlObj = url.startsWith("http") ? new URL(url) : undefined
-
-        const res = await fetch(urlObj ? urlObj.pathname + urlObj.search : url)
-        if (!res.ok) throw new Error(`Failed to fetch worker: ${res.status}`)
-
-        const script = await res.text()
-        const blob = new Blob([script], { type: "application/javascript" })
-        const objectURL = URL.createObjectURL(blob)
-
-        const real = new OriginWorker(objectURL, {
-          type: "classic",
-          ...options
-        })
-
-        this.realWorker = real
-
-        real.addEventListener("message", (event) => {
-          this._onmessage?.call(this, event)
-          this.listeners.get("message")?.forEach((listener) => {
-            if (typeof listener === "function") listener.call(this, event)
-            else if (typeof listener.handleEvent === "function")
-              listener.handleEvent(event)
-          })
-        })
-
-        real.addEventListener("messageerror", (event) => {
-          this._onmessageerror?.call(this, event)
-          this.listeners.get("messageerror")?.forEach((listener) => {
-            if (typeof listener === "function") listener.call(this, event)
-            else if (typeof listener.handleEvent === "function")
-              listener.handleEvent(event)
-          })
-        })
-
-        real.addEventListener("error", (event) => {
-          this._onerror?.call(this, event)
-          this.listeners.get("error")?.forEach((listener) => {
-            if (typeof listener === "function") listener.call(this, event)
-            else if (typeof listener.handleEvent === "function")
-              listener.handleEvent(event)
-          })
-        })
-
-        this.queue.forEach(({ method, args }) => {
-          // @ts-expect-error: dynamic call
-          real[method](...args)
-        })
-        this.queue = []
-      } catch (err) {
-        console.error("CORSWorker init error:", err)
-      }
-    }
-
-    postMessage(...args: any[]): void {
-      // @ts-expect-error: dynamic call
-      if (this.realWorker) this.realWorker.postMessage(...args)
-      else this.queue.push({ method: "postMessage", args })
-    }
-
-    terminate(): void {
-      if (this.realWorker) this.realWorker.terminate()
-      else this.queue.push({ method: "terminate", args: [] })
-    }
-
-    get onmessage() {
-      return this._onmessage
-    }
-
-    set onmessage(handler) {
-      this._onmessage = handler
-      if (this.realWorker) {
-        this.realWorker.onmessage = (e) => {
-          handler?.call(this, e)
-          this.dispatchEvent(e)
-        }
-      }
-    }
-
-    get onerror() {
-      return this._onerror
-    }
-
-    set onerror(handler) {
-      this._onerror = handler
-      if (this.realWorker) {
-        this.realWorker.onerror = (e) => {
-          handler?.call(this, e)
-          this.dispatchEvent(e)
-        }
-      }
-    }
-
-    get onmessageerror() {
-      return this._onmessageerror
-    }
-
-    set onmessageerror(handler) {
-      this._onmessageerror = handler
-      if (this.realWorker) {
-        this.realWorker.onmessageerror = (e) => {
-          handler?.call(this, e)
-          this.dispatchEvent(e)
-        }
-      }
-    }
-
-    addEventListener(
-      type: string,
-      listener: EventListenerOrEventListenerObject
-    ): void {
-      if (!this.listeners.has(type)) this.listeners.set(type, new Set())
-
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.listeners.get(type)!.add(listener)
-    }
-
-    removeEventListener(
-      type: string,
-      listener: EventListenerOrEventListenerObject
-    ): void {
-      this.listeners.get(type)?.delete(listener)
-    }
-
-    dispatchEvent(event: Event): boolean {
-      const type = event.type
-      const listenerSet = this.listeners.get(type)
-      if (!listenerSet) return true
-
-      // eslint-disable-next-line functional/no-loop-statements
-      for (const listener of listenerSet) {
-        try {
-          if (typeof listener === "function") listener.call(this, event)
-          else if (typeof listener.handleEvent === "function")
-            listener.handleEvent(event)
-        } catch (err) {
-          console.error("Error in event listener:", err)
-        }
-      }
-      return true
-    }
-  }
-
-  Object.assign(window, { Worker: CORSWorker })
-}
+// Apply btoa patch in main world immediately
+patchBtoa()
 function patchAnimeVsubHelper() {
   const eventsAbort = new (class EventsAbort {
     // eslint-disable-next-line func-call-spacing
@@ -242,10 +81,17 @@ function patchAnimeVsubHelper() {
       }
     }
 
+    const targetUrl = detail.req.url
+      .replace(
+        /^https?:\/\/cdn\.animevietsub\.[^/]+/i,
+        "https://cdn.animevietsub.zip"
+      )
+      .replace(/^https?:\/\/animevietsub\.[^/]+/i, "https://animevietsub.zip")
+
     document.dispatchEvent(
       new CustomEvent<DetailCustomEvent_sendToInject>("http:response", {
         detail: encodeDetail(
-          await fetch(detail.req.url, { ...detail.req, body: form, signal })
+          await fetch(targetUrl, { ...detail.req, body: form, signal })
             .then(async (res): Promise<DetailCustomEvent_sendToInject> => {
               const output: RequestResponse = {
                 headers: Object.fromEntries(
@@ -262,11 +108,26 @@ function patchAnimeVsubHelper() {
                     ? await res.text()
                     : arrayBufferToBase64(await res.arrayBuffer())
                   break
-                case "json":
-                  output.data = await res.json()
+                case "json": {
+                  const text = await res.text()
+                  const cleaned = text
+                    .replace(
+                      /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+                      "cdn.animevietsub.zip"
+                    )
+                    .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+                  output.data = JSON.parse(cleaned)
                   break
-                default:
-                  output.data = await res.text()
+                }
+                default: {
+                  const text = await res.text()
+                  output.data = text
+                    .replace(
+                      /cdn\.animevietsub\.(?:pl|id|tv|net)/gi,
+                      "cdn.animevietsub.zip"
+                    )
+                    .replace(/:\/\/animevietsub\.pl/gi, "://animevietsub.zip")
+                }
               }
 
               return {
