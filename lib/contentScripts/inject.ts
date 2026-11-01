@@ -3,6 +3,10 @@
 
 import browser from "webextension-polyfill"
 
+const isEmbedPage = new URLSearchParams(location.search).has(
+  "animevsub-embed-origins"
+)
+
 function injectScript(fileName: string) {
   const script = document.createElement("script")
   script.src = browser.runtime.getURL(`dist/contentScripts/${fileName}`)
@@ -18,11 +22,13 @@ function injectScript(fileName: string) {
   }
 }
 
-document.querySelectorAll("script").forEach((script) => script.remove())
+if (isEmbedPage) {
+  document.querySelectorAll("script").forEach((script) => script.remove())
+}
 
 // Embed bridge: exposes window.AnimeVsubEmbed on every page and listens for
 // requests inside embedded animevietsub pages.
 injectScript("embed.global.js")
 
-if (!location.href.includes("animevsub.eu.org"))
+if (!isEmbedPage && !location.href.includes("animevsub.eu.org"))
   injectScript("inject2.global.js")
