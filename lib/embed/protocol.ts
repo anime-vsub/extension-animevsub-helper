@@ -135,7 +135,7 @@ export function serializeError(error: unknown): EmbedErrorMessage["error"] {
  * animevietsub.id, animevietsub.xyz, www.animevietsub.tv, ...).
  */
 export function isAnimevietsubHost(hostname: string) {
-  return /^(?:[a-z0-9-]+\.)*animevietsub\.[a-z0-9.-]+$/i.test(hostname)
+  return /^(?:[a-z0-9-]+\.)*(?:animevietsub|googleapiscdn|fbcdns)\.[a-z0-9.-]+$/i.test(hostname)
 }
 
 /**
