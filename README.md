@@ -34,21 +34,104 @@ Install for
 
 ~~Use them by calling `window.Http.get` or `window.Http.post` in your website~~
 
+## Embed bridge
 
+Any website can embed an `animevietsub.*` page (for example
+`https://animevietsub.id/404`) and use it as a same-origin HTTP bridge. The
+embedded page executes the request with its own cookies and `Referer`, then
+sends the result back to the parent page with `postMessage`.
+
+> [!NOTE]
+> The extension removes `X-Frame-Options` / `Content-Security-Policy` response
+> headers for `animevietsub.*` sub-frames so the page can be embedded.
+
+### Plain JavaScript
+
+The extension exposes `window.AnimeVsubEmbed` on every page:
+
+```js
+const bridge = window.AnimeVsubEmbed.create({
+  src: "https://animevietsub.id/404",
+  hidden: true
+})
+
+await bridge.ready
+
+const res = await bridge.get("/ajax/...", { responseType: "json" })
+console.log(res.status, res.data)
+
+// POST with form data
+await bridge.post("/ajax/...", { key: "value" }, { responseType: "json" })
+
+// Absolute URLs are supported too
+await bridge.get("https://animevietsub.id/ajax/...", {
+  responseType: "arraybuffer"
+})
+```
+
+A complete demo is available at
+[`examples/embed-bridge.html`](./examples/embed-bridge.html).
+
+### With the npm client
+
+```ts
+import { createEmbedBridge } from "client-ext-animevsub-helper"
+
+const bridge = createEmbedBridge({
+  src: "https://animevietsub.id/404",
+  hidden: true
+})
+
+const res = await bridge.get<{ data: unknown }>("/ajax/...", {
+  responseType: "json"
+})
+```
+
+### Restricting parent origins
+
+By default the embedded page answers its direct parent frame. To restrict which
+origins are accepted, add the `animevsub-embed-origins` query parameter to the
+iframe URL:
+
+```js
+window.AnimeVsubEmbed.create({
+  src:
+    "https://animevietsub.id/404?animevsub-embed-origins=" +
+    encodeURIComponent("https://animevsub.eu.org,https://*.animevsub.eu.org")
+})
+```
+
+### API
+
+| Member | Description |
+| ---- | ---- |
+| `bridge.ready` | Resolves when the embedded page is ready. |
+| `bridge.get(url, options)` | GET request. |
+| `bridge.post(url, data, options)` | POST request. |
+| `bridge.request(options)` | Any method (`options.method`). |
+| `bridge.iframe` | The iframe element. |
+| `bridge.destroy()` | Removes listeners and the iframe. |
+
+`options` supports `headers`, `responseType` (`text` default, `json`,
+`arraybuffer`), `timeout`, and every `RequestInit` field supported by the
+embedded page (`method`, `cache`, `redirect`, ...).
 
 ## Development
 
-1. Run this script:
+This project uses [Bun](https://bun.sh) as the package manager. Install Bun
+**1.4.4 or newer** first.
+
+1. Install dependencies:
 ```bash
-pnpm i
+bun install
 ```
-2. Next, For manifest v2 run `cd manifest-v2`. For manifest v3 run `cd manifest-v3`
+2. Next, for manifest v2 run `cd manifest-v2`. For manifest v3 run `cd manifest-v3`
 3. Run:
 ```bash
-pnpm dev
+bun run dev
 ```
 4. New Terminal run:
 ```bash
-pnpm start:chrome # open chrome
-pnpm start:firefox # open firefox
+bun run start:chromium # open chromium/chrome
+bun run start:firefox # open firefox
 ```

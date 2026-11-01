@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "vite dev",
-    "prepublishOnly": "pnpm test && pnpm build",
+    "prepublishOnly": "bun run test && bun run build",
     "test": "echo 'No test'",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -39,7 +39,7 @@
   ],
   "husky": {
     "hooks": {
-      "pre-commit": "pnpm format"
+      "pre-commit": "bun run --cwd .. format"
     }
   },
   "engines": {

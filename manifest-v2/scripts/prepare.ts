@@ -26,7 +26,7 @@ async function stubIndexHtml() {
 }
 
 function writeManifest() {
-  execSync("npx tsx ./scripts/manifest.ts", { stdio: "inherit" })
+  execSync("bunx tsx ./scripts/manifest.ts", { stdio: "inherit" })
 }
 
 fs.copySync(r("../lib/assets"), r("extension/assets"))

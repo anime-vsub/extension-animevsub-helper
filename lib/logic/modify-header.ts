@@ -12,7 +12,7 @@ export function removeHeader(
     key as "requestHeaders"
   ] = (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
     key as "requestHeaders"
-  ]?.filter((item) => item.name.toLowerCase() != name)
+  ]?.filter((item) => item.name.toLowerCase() !== name)
 
   return details
 }
@@ -37,11 +37,12 @@ export function setHeader(
       !(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
         key as "requestHeaders"
       ]
-    )
+    ) {
       (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
         key as "requestHeaders"
       ] = []
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ;(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
       key as "requestHeaders"
     ]!.push({
@@ -67,11 +68,12 @@ export function addHeader(
     !(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
       key as "requestHeaders"
     ]
-  )
+  ) {
     (details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
       key as "requestHeaders"
     ] = []
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   ;(details as browser.WebRequest.OnBeforeSendHeadersDetailsType)[
     key as "requestHeaders"
   ]!.push({

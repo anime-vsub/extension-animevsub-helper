@@ -19,20 +19,18 @@ jobs:
         with:
           node-version: 21
 
-      - uses: pnpm/action-setup@v2.0.1
-        name: Install pnpm
-        id: pnpm-install
+      - uses: oven-sh/setup-bun@v2
+        name: Install Bun
         with:
-          version: 8
-          run_install: false
+          bun-version: 1.4.4
 
       - name: Pack
         run: |
-          pnpm i
+          bun install --frozen-lockfile
           cd manifest-v2
-          pnpm clear
-          pnpm build
-          pnpm run pack
+          bun run clear
+          bun run build
+          bun run pack
           
       - name: Generate changelog
         id: changelog

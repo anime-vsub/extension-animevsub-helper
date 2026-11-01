@@ -186,3 +186,5 @@ export function setReferrers(referrers: Record<string, string>) {
     )
   })
 }
+
+export * from "./embed"

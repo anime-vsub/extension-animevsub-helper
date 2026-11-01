@@ -1,0 +1,4 @@
+[install]
+# Keep the flat node_modules layout used by the previous package manager so
+# tools that resolve plugins from the project root keep working.
+linker = "hoisted"

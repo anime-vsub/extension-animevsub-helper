@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AnimeVsub Embed Bridge demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem auto;
+        max-width: 760px;
+        padding: 0 1rem;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+        font-weight: 600;
+      }
+      input,
+      select,
+      button {
+        box-sizing: border-box;
+        margin-top: 0.35rem;
+        padding: 0.5rem;
+        width: 100%;
+      }
+      button {
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      pre {
+        background: #111;
+        color: #eee;
+        overflow: auto;
+        padding: 1rem;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AnimeVsub Embed Bridge</h1>
+    <p>
+      Demo này cần cài extension <strong>AnimeVsub Helper</strong>. Iframe sẽ
+      thực hiện request bằng origin của animevietsub và trả kết quả về trang
+      này.
+    </p>
+
+    <label>
+      Trang embed
+      <input id="src" value="https://animevietsub.id/404" />
+    </label>
+
+    <label>
+      URL request (tương đối hoặc tuyệt đối)
+      <input id="url" value="/" />
+    </label>
+
+    <label>
+      Method
+      <select id="method">
+        <option>GET</option>
+        <option>POST</option>
+      </select>
+    </label>
+
+    <label>
+      Response type
+      <select id="responseType">
+        <option>text</option>
+        <option>json</option>
+        <option>arraybuffer</option>
+      </select>
+    </label>
+
+    <button id="send">Gửi request</button>
+    <pre id="output">Chưa có request.</pre>
+
+    <script>
+      const $ = (id) => document.getElementById(id)
+
+      function waitForApi(timeout = 15000) {
+        return new Promise((resolve, reject) => {
+          const started = Date.now()
+          const timer = setInterval(() => {
+            if (window.AnimeVsubEmbed) {
+              clearInterval(timer)
+              resolve(window.AnimeVsubEmbed)
+            } else if (Date.now() - started > timeout) {
+              clearInterval(timer)
+              reject(new Error("Không tìm thấy window.AnimeVsubEmbed."))
+            }
+          }, 100)
+        })
+      }
+
+      $("send").addEventListener("click", async () => {
+        const output = $("output")
+        output.textContent = "Đang gửi..."
+
+        let bridge
+        try {
+          const api = await waitForApi()
+          bridge = api.create({ src: $("src").value, hidden: true })
+          await bridge.ready
+
+          const method = $("method").value
+          const options = {
+            responseType: $("responseType").value,
+            timeout: 30000
+          }
+
+          const res =
+            method === "POST"
+              ? await bridge.post($("url").value, {}, options)
+              : await bridge.get($("url").value, options)
+
+          const data =
+            options.responseType === "arraybuffer"
+              ? `[ArrayBuffer ${res.data.byteLength} bytes]`
+              : res.data
+
+          output.textContent = JSON.stringify(
+            {
+              status: res.status,
+              url: res.url,
+              headers: res.headers,
+              data
+            },
+            null,
+            2
+          )
+        } catch (error) {
+          output.textContent = String(error?.stack ?? error)
+        } finally {
+          bridge?.destroy()
+        }
+      })
+    </script>
+  </body>
+</html>

@@ -6,9 +6,9 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   // eslint-disable-next-line camelcase
   const len = binary_string.length
   const bytes = new Uint8Array(len)
-  // eslint-disable-next-line functional/no-let
+  // eslint-disable-next-line functional/no-loop-statements
   for (let i = 0; i < len; i++)
-    // eslint-disable-next-line functional/immutable-data, camelcase
+    // eslint-disable-next-line camelcase
     bytes[i] = binary_string.charCodeAt(i)
 
   return bytes.buffer

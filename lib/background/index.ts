@@ -10,6 +10,7 @@ import { EXTRA } from "../env"
 import { arrayBufferToBase64 } from "../logic/arrayBufferToBase64"
 
 import { getReferrers } from "./logic/get-referrers"
+import { installEmbedRules } from "./logic/install-embed-rules"
 import { installReferrers } from "./logic/install-referers"
 
 // setup install rules default
@@ -19,6 +20,11 @@ const setup = Promise.all([
     installReferrers(referrers as Record<string, string>)
   )
 ])
+
+// The embed rules are optional: never let a failure here break the HTTP API.
+installEmbedRules().catch((error) => {
+  console.error("[AnimeVsub Helper] Failed to install embed rules:", error)
+})
 
 onMessage<Record<string, string>>("set:referrers", async ({ data }) => {
   await setup
@@ -134,8 +140,8 @@ async function sendRequest({
         headers: await mergeSetCookie(res.headers, res.url),
         data:
           responseType === "arraybuffer"
-            ? // eslint-disable-next-line promise/no-nesting
-            await res.arrayBuffer().then(arrayBufferToBase64)
+            ? // eslint-disable-next-line promise/no-nesting, indent
+              await res.arrayBuffer().then(arrayBufferToBase64)
             : await res.text(),
         url: res.url,
         status: res.status

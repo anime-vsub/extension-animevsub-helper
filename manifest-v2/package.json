@@ -1,30 +1,31 @@
 {
-  "name": "animevsub-helper",
+  "name": "animevsub-helper-mv2",
   "displayName": "AnimeVsub Helper",
   "version": "1.0.46",
   "description": "Extension add API helper for AnimeVsub",
   "private": true,
-  "packageManager": "pnpm@7.8.0",
   "scripts": {
-    "dev": "npm run clear && cross-env NODE_ENV=development run-p dev:*",
+    "dev": "bun run clear && cross-env NODE_ENV=development run-p dev:web dev:prepare dev:js dev:inject dev:inject2 dev:embed",
     "dev:prepare": "tsx scripts/prepare.ts",
     "dev:web": "vite",
-    "dev:js": "npm run build:js -- --mode development",
-    "dev:inject": "npm run build:inject -- --mode development",
-    "dev:inject2": "npm run build:inject2 -- --mode development",
-    "build": "cross-env NODE_ENV=production run-s clear build:web build:prepare build:js build:inject build:inject2",
+    "dev:js": "bun run build:js -- --mode development",
+    "dev:inject": "bun run build:inject -- --mode development",
+    "dev:inject2": "bun run build:inject2 -- --mode development",
+    "dev:embed": "bun run build:embed -- --mode development",
+    "build": "cross-env NODE_ENV=production run-s clear build:web build:prepare build:js build:inject build:inject2 build:embed",
     "build:prepare": "tsx scripts/prepare.ts",
     "build:web": "vite build",
     "build:js": "vite build --config vite.config.content.ts",
     "build:inject": "vite build --config vite.config.content-inject.ts",
     "build:inject2": "vite build --config vite.config.content-inject2.ts",
-    "pack": "cross-env NODE_ENV=production run-p pack:*",
+    "build:embed": "vite build --config vite.config.content-embed.ts",
+    "pack": "cross-env NODE_ENV=production run-p pack:zip pack:crx pack:xpi",
     "pack:zip": "rimraf mv2-extension.zip && jszip-cli add extension/* -o ./mv2-extension.zip",
     "pack:crx": "crx pack extension -o ./mv2-extension.crx",
     "pack:xpi": "cross-env WEB_EXT_ARTIFACTS_DIR=./ web-ext build --source-dir ./extension --filename mv2-extension.xpi --overwrite-dest",
     "start:chromium": "web-ext run --source-dir ./extension --target=chromium",
     "start:firefox": "web-ext run --source-dir ./extension --target=firefox-desktop",
-    "clear": "rimraf extension/dist extension/manifest.json mv2-extension.*",
+    "clear": "rimraf extension/dist extension/manifest.json mv2-extension.zip mv2-extension.crx mv2-extension.xpi",
     "release": "bumpp package.json --commit \"[mv2] chore: release v%s\" --tag \"mv2_v%s\" --push"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
     "fs-extra": "^10.1.0",
     "tsup": "^6.7.0",
     "vite": "^2.9.16",
-    "webextension-polyfill": "^0.9.0"
+    "webextension-polyfill": "^0.9.0",
+    "yaml": "^2.9.1"
   }
 }
