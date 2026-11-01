@@ -1,6 +1,6 @@
 {
   "name": "extension-animevsub-helper",
-  "version": "1.0.47",
+  "version": "1.0.48",
   "packageManager": "bun@1.4.4",
   "workspaces": [
     "manifest-v2",
